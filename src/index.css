@@ -1,0 +1,130 @@
+﻿
+@layer base {
+  :root {
+    /* Brand */
+    --background: 210 40% 96.1%; /* slate-100 */
+    --foreground: 222 47% 11%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 222 47% 11%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 222 47% 11%;
+
+    /* Royal blue primary */
+    --primary: 221 83% 33%;
+    --primary-foreground: 0 0% 100%;
+    --primary-glow: 221 83% 53%;
+
+    /* Warm gold accent */
+    --accent: 38 92% 50%;
+    --accent-foreground: 222 47% 11%;
+    --accent-glow: 45 95% 60%;
+
+    --secondary: 210 40% 96%;
+    --secondary-foreground: 222 47% 11%;
+
+    --muted: 210 40% 96%;
+    --muted-foreground: 215 16% 47%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 214 32% 91%;
+    --input: 214 32% 91%;
+    --ring: 221 83% 33%;
+
+    --radius: 0.75rem;
+
+    /* Gradients */
+    --gradient-hero: linear-gradient(135deg, hsl(221 83% 33%) 0%, hsl(221 83% 53%) 50%, hsl(38 92% 50%) 100%);
+    --gradient-primary: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--primary-glow)));
+    --gradient-accent: linear-gradient(135deg, hsl(var(--accent)), hsl(var(--accent-glow)));
+    --gradient-subtle: linear-gradient(180deg, hsl(210 40% 99%), hsl(210 40% 96%));
+
+    /* Shadows */
+    --shadow-elegant: 0 10px 40px -10px hsl(221 83% 33% / 0.25);
+    --shadow-glow: 0 0 60px hsl(221 83% 53% / 0.3);
+    --shadow-card: 0 4px 20px -4px hsl(222 47% 11% / 0.08);
+
+    /* Transitions */
+    --transition-smooth: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-bounce: all 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+
+    --sidebar-background: 0 0% 98%;
+    --sidebar-foreground: 240 5% 26%;
+    --sidebar-primary: 221 83% 33%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 240 5% 96%;
+    --sidebar-accent-foreground: 240 6% 10%;
+    --sidebar-border: 220 13% 91%;
+    --sidebar-ring: 221 83% 53%;
+  }
+
+  .dark {
+    --background: 222 47% 6%;
+    --foreground: 210 40% 98%;
+    --card: 222 47% 9%;
+    --card-foreground: 210 40% 98%;
+    --popover: 222 47% 9%;
+    --popover-foreground: 210 40% 98%;
+    --primary: 221 83% 60%;
+    --primary-foreground: 222 47% 6%;
+    --primary-glow: 221 83% 70%;
+    --accent: 38 92% 55%;
+    --accent-foreground: 222 47% 6%;
+    --secondary: 217 33% 17%;
+    --secondary-foreground: 210 40% 98%;
+    --muted: 217 33% 17%;
+    --muted-foreground: 215 20% 65%;
+    --destructive: 0 63% 45%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 217 33% 20%;
+    --input: 217 33% 20%;
+    --ring: 221 83% 60%;
+  }
+}
+
+@layer utilities {
+  .bg-hero-gradient { background: var(--gradient-hero); }
+  .bg-primary-gradient { background: var(--gradient-primary); }
+  .bg-accent-gradient { background: var(--gradient-accent); }
+  .bg-subtle-gradient { background: var(--gradient-subtle); }
+  .shadow-elegant { box-shadow: var(--shadow-elegant); }
+  .shadow-glow { box-shadow: var(--shadow-glow); }
+  .shadow-card { box-shadow: var(--shadow-card); }
+  .transition-smooth { transition: var(--transition-smooth); }
+  .transition-bounce { transition: var(--transition-bounce); }
+
+  .text-gradient {
+    background-image: var(--gradient-hero);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  .animate-slide-left  { animation: slide-in-left  0.8s cubic-bezier(0.4,0,0.2,1) both; }
+  .animate-slide-right { animation: slide-in-right 0.8s cubic-bezier(0.4,0,0.2,1) both; }
+  .animate-fade-up     { animation: fade-in-up     0.7s cubic-bezier(0.4,0,0.2,1) both; }
+  .animate-float       { animation: float 3s ease-in-out infinite; }
+  .reveal { opacity: 0; }
+  .reveal.in-view { opacity: 1; transition: opacity 0.8s cubic-bezier(0.4,0,0.2,1); }
+}
+
+/* Slide animations */
+@keyframes slide-in-left {
+  from { transform: translateX(-60px); opacity: 0; }
+  to   { transform: translateX(0);     opacity: 1; }
+}
+@keyframes slide-in-right {
+  from { transform: translateX(60px);  opacity: 0; }
+  to   { transform: translateX(0);     opacity: 1; }
+}
+@keyframes fade-in-up {
+  from { transform: translateY(30px); opacity: 0; }
+  to   { transform: translateY(0);    opacity: 1; }
+}
+@keyframes float {
+  0%,100% { transform: translateY(0); }
+  50%     { transform: translateY(-10px); }
+}
+

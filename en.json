@@ -1,0 +1,20 @@
+{
+  "home": {
+    "whoWeAre": {
+      "title": "Who We Are",
+      "description": "Your company's description goes here. We are a team of passionate individuals dedicated to making a difference."
+    },
+    "ourVision": {
+      "title": "Our Vision",
+      "description": "Our vision is to create a world where..."
+    },
+    "ourMission": {
+      "title": "Our Mission",
+      "description": "Our mission is to deliver exceptional value to our customers through..."
+    }
+  },
+  "services": {
+    "title": "Our Services",
+    "description": "We offer a wide range of services to meet your needs."
+  }
+}

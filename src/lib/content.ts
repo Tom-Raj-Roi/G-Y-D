@@ -44,35 +44,35 @@ export const DEFAULT_SECTIONS: Section[] = [
     title: "Disclaimer",
     body: `
 
-* This platform/service is completely free of charge. No upfront payment is required from job seekers or employers.
+>> This platform/service is completely free of charge. No upfront payment is required from job seekers or employers.
 
-* Employers or company representatives may refer job vacancies through this platform, and job seekers can explore and apply for suitable opportunities.
+>> Employers or company representatives may refer job vacancies through this platform, and job seekers can explore and apply for suitable opportunities.
 
-* Once an employer or referring agent identifies a suitable candidate, they may proceed with their own selection and hiring process independently.
+>> Once an employer or referring agent identifies a suitable candidate, they may proceed with their own selection and hiring process independently.
 
-* If a candidate is successfully hired, the person who referred the opportunity may choose to: Offer the referral free of cost, or Request a referral reward from the candidate (optional and mutually agreed).
+>> If a candidate is successfully hired, the person who referred the opportunity may choose to: Offer the referral free of cost, or Request a referral reward from the candidate (optional and mutually agreed).
 
-* Any referral reward or payment must be made only after the candidate has officially joined the company.
+>> Any referral reward or payment must be made only after the candidate has officially joined the company.
 
-* Do not make any payment before joining.
+>> Do not make any payment before joining.
 
-* Candidates who secure a job through a referral are encouraged (but not legally required) to refer other job seekers within their network.
+>> Candidates who secure a job through a referral are encouraged (but not legally required) to refer other job seekers within their network.
 
-* If any candidate chooses to pay money before joining a job, and suffers any loss, we are not responsible for such transactions.
+>> If any candidate chooses to pay money before joining a job, and suffers any loss, we are not responsible for such transactions.
 
-* Candidates must independently verify the authenticity of job offers, including offer letters, company details, and employment terms.
+>> Candidates must independently verify the authenticity of job offers, including offer letters, company details, and employment terms.
 
-* We are not responsible for fake or misleading job offers.
+>> We are not responsible for fake or misleading job offers.
 
-* We act only as a platform for connecting job seekers and referrers. We are not involved in hiring decisions or employment contracts.
+>> We act only as a platform for connecting job seekers and referrers. We are not involved in hiring decisions or employment contracts.
 
-* Any agreement regarding referral rewards is strictly between the candidate and the referrer. We are not a party to such agreements.
+>> Any agreement regarding referral rewards is strictly between the candidate and the referrer. We are not a party to such agreements.
 
-* Users must ensure that all information shared (resume, job details, company info) is accurate and truthful.
+>> Users must ensure that all information shared (resume, job details, company info) is accurate and truthful.
 
-* Any misuse of the platform, including scams, false job postings, or misleading information, may result in removal or restriction of access.
+>> Any misuse of the platform, including scams, false job postings, or misleading information, may result in removal or restriction of access.
 
-* We reserve the right to modify these terms at any time without prior notice.`,
+>> We reserve the right to modify these terms at any time without prior notice.`,
     position: 2,
     visible: true,
   },
@@ -104,11 +104,11 @@ We envision a future where every individual can access meaningful career opportu
 
 We strive to:
 
-Connect talent with opportunities worldwide.
-Simplify the hiring process for employers and candidates.
-Support career growth through guidance and professional networking.
-Build long-term partnerships based on trust and transparency.
-Create a positive impact on the global workforce.`,
+=> Connect talent with opportunities worldwide.
+=> Simplify the hiring process for employers and candidates.
+=> Support career growth through guidance and professional networking.
+=> Build long-term partnerships based on trust and transparency.
+=> Create a positive impact on the global workforce.`,
     position: 3,
     visible: true,
   },
@@ -139,9 +139,9 @@ We kindly request that only serious and committed candidates contact us. If you 
 
 We are looking to work with individuals who:
 
-Have a genuine interest in achieving their goals
-Are ready to cooperate throughout the process
-Value honesty and professionalism
+=> Have a genuine interest in achieving their goals
+=> Are ready to cooperate throughout the process
+=> Value honesty and professionalism
 
 If you are not fully committed, or if your inquiry is only for formality or casual interest, we respectfully ask that you refrain from contacting us. We aim to maintain efficiency and focus on candidates who are serious, as we are not willing to spend valuable time on incomplete or non-serious applications.
 
@@ -163,21 +163,21 @@ Our organization is committed to delivering authentic and transparent recruitmen
 
 If you are willing to refer job opportunities, you are welcome to contact us without hesitation. However, we expect a high level of professionalism and cooperation. We encourage only those referrers who:
 
-Respect time and maintain clear, consistent communication
-Are willing to cooperate throughout the recruitment process
-Understand the importance of providing accurate and verified information
+>> Respect time and maintain clear, consistent communication
+>> Are willing to cooperate throughout the recruitment process
+>> Understand the importance of providing accurate and verified information
 
 We strictly prohibit:
 
-Fake offer letters or unverified job references (both domestic and international)
-Submission of incorrect, incomplete, or misleading company or job details
-Any form of unethical recruitment practices
+=> Fake offer letters or unverified job references (both domestic and international)
+=> Submission of incorrect, incomplete, or misleading company or job details
+=> Any form of unethical recruitment practices
 
 All job referrals must include complete and accurate information, such as:
 
-Company details and background
-Job role, responsibilities, and requirements
-Location, salary structure, and employment terms
+=> Company details and background
+=> Job role, responsibilities, and requirements
+=> Location, salary structure, and employment terms
 
 Additionally, no referrer has the right to request any referral fees, rewards, or payments from candidates before or during the initial stages of the process. We maintain a fair and ethical approach to ensure candidates are protected from exploitation.
 

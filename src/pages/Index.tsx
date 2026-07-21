@@ -13,17 +13,17 @@ import { DEFAULT_SECTIONS } from "@/lib/content";
 // Import hero image from assets
 import heroImage from "@/assets/hero.jpg";
 
-// Placeholder images using Unsplash
-const imgDisclaimer = "https://images.unsplash.com/photo-1450101499163-c8848c66ca85?w=800&q=80";
-const imgServices = "https://images.unsplash.com/photo-1552664730-d307ca884978?w=800&q=80";
-const imgSeekers = "https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?w=800&q=80";
-const imgReferrer = "https://images.unsplash.com/photo-1600880292203-757bb62b4baf?w=800&q=80";
-const imgAgency = "https://images.unsplash.com/photo-1497366216548-37526070297c?w=800&q=80";
-const imgContact = "https://images.unsplash.com/photo-1423666639041-f56000c27a9a?w=800&q=80";
-const imgEmployerNote = "https://images.unsplash.com/photo-1556761175-b413da4baf72?w=800&q=80";
-const imgWhoWeAre = "https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=800&q=80";
-const imgOurVision = "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=800&q=80";
-const imgOurMission = "https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?w=800&q=80";
+// Local image placeholders - drop your JPG/PNG files into src/assets and import them here
+import imgDisclaimer from "@/assets/hero.jpg";
+import imgServices from "@/assets/hero.jpg";
+import imgSeekers from "@/assets/hero.jpg";
+import imgReferrer from "@/assets/hero.jpg";
+import imgAgency from "@/assets/hero.jpg";
+import imgContact from "@/assets/hero.jpg";
+import imgEmployerNote from "@/assets/hero.jpg";
+import imgWhoWeAre from "@/assets/hero.jpg";
+import imgOurVision from "@/assets/hero.jpg";
+import imgOurMission from "@/assets/hero.jpg";
 
 interface Section {
   id: string;

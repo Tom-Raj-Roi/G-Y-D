@@ -69,7 +69,7 @@ export default function Index() {
         <div className="relative container mx-auto px-4 py-28 lg:py-40">
           <div className="max-w-3xl text-primary-foreground space-y-8">
             <div className="inline-flex items-center gap-2 px-4 py-2 bg-accent/20 backdrop-blur-sm border border-accent/40 rounded-full text-accent text-sm font-medium animate-fade-up">
-              <Globe className="h-4 w-4" /> Your Global Career Partner
+              <Globe className="h-4 w-4" /> {translate("hero.badge", "Your Global Career Partner")}
             </div>
             <EditableText 
               id="hero.title" 
@@ -86,13 +86,13 @@ export default function Index() {
             />
             <div className="flex flex-wrap gap-4 animate-fade-up pt-4">
               <Link to="/job-seekers" className="inline-flex items-center justify-center rounded-md text-lg font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-accent text-accent-foreground hover:bg-accent/90 h-11 px-8 py-6">
-                Find Jobs <ArrowRight className="ml-2 h-5 w-5" />
+                {translate("hero.find_jobs", "Find Jobs")} <ArrowRight className="ml-2 h-5 w-5" />
               </Link>
               <Link to="/current-vacancy" className="inline-flex items-center justify-center rounded-md text-lg font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-transparent text-primary-foreground hover:bg-primary-foreground hover:text-primary h-11 px-8 py-6 border-primary-foreground/40">
-                View Vacancies
+                {translate("hero.view_vacancies", "View Vacancies")}
               </Link>
               <Link to="/contact" className="inline-flex items-center justify-center rounded-md text-lg font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-accent/60 bg-accent/10 text-accent hover:bg-accent hover:text-accent-foreground h-11 px-8 py-6">
-                Contact Us
+                {translate("hero.contact_us", "Contact Us")}
               </Link>
             </div>
           </div>
@@ -212,17 +212,17 @@ export default function Index() {
                         multiline 
                       />
                       <div className="rounded-xl border bg-muted/30 p-6 space-y-3">
-                        <p className="flex items-start gap-2">
-                          <span className="font-semibold text-primary">General inquiries:</span>
+                        <div className="flex items-start gap-2">
+                          <span className="font-semibold text-primary">{translate("home.contact.general_inquiries", "General inquiries:")}</span>
                           <a href="mailto:info@getyourdreams.com" className="text-primary underline">info@getyourdreams.com</a>
-                        </p>
-                        <p className="flex items-start gap-2">
-                          <span className="font-semibold text-accent">CV & Documents:</span>
+                        </div>
+                        <div className="flex items-start gap-2">
+                          <span className="font-semibold text-accent">{translate("home.contact.cv_documents", "CV & Documents:")}</span>
                           <a href="mailto:hr@getyourdreams.com" className="text-accent font-semibold underline">hr@getyourdreams.com</a>
-                        </p>
-                        <p className="text-xs text-muted-foreground bg-muted/50 rounded-lg p-3 mt-3">
-                          Please use the info mailbox only for inquiries. All applications and documents must be sent to hr@getyourdreams.com.
-                        </p>
+                        </div>
+                        <div className="text-xs text-muted-foreground bg-muted/50 rounded-lg p-3 mt-3">
+                          <EditableText id="home.contact.note" fallback="Please use the info mailbox only for inquiries. All applications and documents must be sent to hr@getyourdreams.com." />
+                        </div>
                         <div className="pt-2 flex items-center gap-2">
                           <Phone className="h-4 w-4 text-primary" />
                           <span className="font-medium">+966 552390860 | +91 6374504413 | +91 9597589990</span>
@@ -234,7 +234,7 @@ export default function Index() {
                   )}
                   {ctaInfo && (
                     <Link to={ctaInfo.to} className="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-11 rounded-md px-8 bg-primary-gradient hover:opacity-90 transition-smooth shadow-elegant">
-                      {translate(ctaInfo.key) !== ctaInfo.key ? translate(ctaInfo.key) : ctaInfo.key.split('.')[1].replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())} 
+                      {translate(ctaInfo.key, ctaInfo.key.split('.')[1].replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()))} 
                       <ArrowRight className="ml-2 h-4 w-4" />
                     </Link>
                   )}
@@ -258,20 +258,11 @@ export default function Index() {
                       as="h2"
                       className="font-display font-bold text-2xl md:text-3xl text-gradient text-center md:text-left"
                     />
-                    <ReadMore
-                      text={`
-
-We are reaching out to organizations and company representatives who are interested in collaborating with us by providing genuine job opportunities for candidates.
-
-We kindly request you to first review our "Who We Are", along with the services and disclaimers we provide. This will help you clearly understand our operational standards, ethical policies, and the nature of our recruitment support process.
-
-Our organization is committed to delivering authentic, transparent, and reliable services. We strictly do not support fake job offers, misleading commitments, or unethical hiring practices under any circumstances.
-
-We welcome companies and employers who operate with integrity and professionalism.`}
-                      limit={300}
+                    <EditableText id="home.employer_note.body" as="div" multiline className="text-foreground/80 leading-relaxed whitespace-pre-line"
+                      fallback={`We are reaching out to organizations and company representatives who are interested in collaborating with us by providing genuine job opportunities for candidates.\n\nWe kindly request you to first review our "Who We Are", along with the services and disclaimers we provide. This will help you clearly understand our operational standards, ethical policies, and the nature of our recruitment support process.\n\nOur organization is committed to delivering authentic, transparent, and reliable services. We strictly do not support fake job offers, misleading commitments, or unethical hiring practices under any circumstances.\n\nWe welcome companies and employers who operate with integrity and professionalism.`}
                     />
                     <Link to="/p/employer-note" className="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-11 rounded-md px-8 border-primary text-primary hover:bg-primary hover:text-primary-foreground">
-                      Read full note <ArrowRight className="ml-2 h-4 w-4" />
+                      {translate("home.employer_note.read_more", "Read full note")} <ArrowRight className="ml-2 h-4 w-4" />
                     </Link>
                   </Reveal>
                 </section>
@@ -291,10 +282,10 @@ We welcome companies and employers who operate with integrity and professionalis
               as="p" className="text-lg text-primary-foreground/80 max-w-2xl mx-auto mb-10" multiline />
             <div className="flex flex-wrap justify-center gap-4">
               <Link to="/job-seekers" className="inline-flex items-center justify-center rounded-md text-lg font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-accent text-accent-foreground hover:bg-accent/90 h-11 px-8 py-6">
-                I am a Job Seeker <ArrowRight className="ml-2 h-5 w-5" />
+                {translate("home.cta.job_seeker", "I am a Job Seeker")} <ArrowRight className="ml-2 h-5 w-5" />
               </Link>
               <Link to="/contact" className="inline-flex items-center justify-center rounded-md text-lg font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-primary-foreground/40 text-primary-foreground hover:bg-primary-foreground hover:text-primary h-11 px-8 py-6">
-                I am an Employer
+                {translate("home.cta.employer", "I am an Employer")}
               </Link>
             </div>
           </Reveal>

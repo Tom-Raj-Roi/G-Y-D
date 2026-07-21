@@ -29,7 +29,7 @@ export default function JobSeekers() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!files.cv) { toast.error("CV is required."); return; }
+    if (!files.cv) { toast.error(translate("job_seekers.toast.cv_required", "CV is required.")); return; }
     setSubmitting(true);
     const cv_url = await uploadApplicationFile(files.cv, "seekers/cv");
     const cover_letter_url = files.cover ? await uploadApplicationFile(files.cover, "seekers/cover") : null;

@@ -14,9 +14,9 @@ export default function Terms() {
     <Layout>
       <div className="container mx-auto px-4 py-12 max-w-3xl">
         <h1 className="font-display font-bold text-4xl text-gradient mb-6">{translate("terms.title", "Terms & Conditions")}</h1>
-        <div className="prose prose-lg max-w-none">
-          <EditableText id="terms.body" multiline as="p" className="text-foreground/80 whitespace-pre-line"
-            fallback={`By using GET YOUR DREAMS, you agree to provide accurate information in all submissions.
+        <div className="prose prose-lg max-w-none text-foreground/80 whitespace-pre-line">
+          <p>
+            {`By using GET YOUR DREAMS, you agree to provide accurate information in all submissions.
 
 1. Acceptance of Terms
 
@@ -118,7 +118,8 @@ Users use the platform at their own discretion.
 
 11. Changes to Terms
 
-We may update these Terms at any time. Continued use of the platform indicates acceptance of revised terms.`} />
+We may update these Terms at any time. Continued use of the platform indicates acceptance of revised terms.`}
+          </p>
         </div>
       </div>
     </Layout>

@@ -14,9 +14,9 @@ export default function Privacy() {
     <Layout>
       <div className="container mx-auto px-4 py-12 max-w-3xl">
         <h1 className="font-display font-bold text-4xl text-gradient mb-6">{translate("privacy.title", "Privacy Policy")}</h1>
-        <div className="prose prose-lg max-w-none">
-          <EditableText id="privacy.body" multiline as="p" className="text-foreground/80 whitespace-pre-line"
-            fallback={`1. Introduction
+        <div className="prose prose-lg max-w-none text-foreground/80 whitespace-pre-line">
+          <p>
+            {`1. Introduction
 
 GET YOUR DREAMS values your privacy and is committed to protecting your personal information.
 
@@ -129,7 +129,8 @@ Our services are intended for individuals legally eligible to work and seek empl
 
 12. Policy Updates
 
-We may update this Privacy Policy periodically. Updated versions will be published on this website.`} />
+We may update this Privacy Policy periodically. Updated versions will be published on this website.`}
+          </p>
         </div>
       </div>
     </Layout>

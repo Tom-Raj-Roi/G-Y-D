@@ -184,8 +184,9 @@ export default function Index() {
           const img = s.image_url || SECTION_IMAGES[s.key] || imgServices;
           const ctaInfo = SECTION_CTA_KEYS[s.key];
           const reverse = i % 2 === 1;
+          const sectionId = s.key.replace(/_/g, "-");
           return (
-            <div key={s.id} className="space-y-28">
+            <div key={s.id} id={sectionId} className="space-y-28 scroll-mt-24">
               <section className="grid md:grid-cols-2 gap-12 items-center">
                 <Reveal direction={reverse ? "right" : "left"} className={reverse ? "md:order-2" : ""}>
                   <EditableImage 
@@ -198,7 +199,7 @@ export default function Index() {
                 <Reveal direction={reverse ? "left" : "right"} className="space-y-6">
                   <EditableText 
                     id={`section.${s.key}.title`} 
-                    fallback={translate(`section.${s.key}.title`) !== `section.${s.key}.title` ? translate(`section.${s.key}.title`) : s.title}
+                    fallback={translate(`section.${s.key}.title`, s.title)}
                     as="h2" 
                     className="font-display font-bold text-3xl md:text-4xl text-gradient" 
                   />
@@ -258,7 +259,7 @@ export default function Index() {
                       className="font-display font-bold text-2xl md:text-3xl text-gradient text-center md:text-left"
                     />
                     <ReadMore
-                      text={`Dear Employers / Company Representatives,
+                      text={`
 
 We are reaching out to organizations and company representatives who are interested in collaborating with us by providing genuine job opportunities for candidates.
 

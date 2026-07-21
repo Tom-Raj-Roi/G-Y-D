@@ -1,5 +1,4 @@
 import { Link, useLocation } from "react-router-dom";
-import { useState } from "react";
 import { Mail, Phone, MapPin, Facebook, Twitter, Linkedin, Instagram, MessageCircle, Users, Music2, Send } from "lucide-react";
 import { useEditor } from "@/contexts/EditorContext";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -10,14 +9,14 @@ import EditableImage from "./EditableImage";
 import logoFallback from "@/assets/company-logo.jpg";
 
 const SOCIALS: { id: string; label: string; fallback: string; Icon: React.ComponentType<{ className?: string }> }[] = [
-  { id: "footer.social.whatsapp_channel", label: "WhatsApp Channel", fallback: "https://whatsapp.com/channel/0029VbEKWwnDp2QC77ngL60O", Icon: MessageCircle },
-  { id: "footer.social.whatsapp_group", label: "WhatsApp Group", fallback: "https://chat.whatsapp.com/KPggZqVk9Gc63a8NboQzYa", Icon: Users },
-  { id: "footer.social.telegram", label: "Telegram", fallback: "https://t.me/+40JIyl-SLqRiYzdl", Icon: Send },
-  { id: "footer.social.instagram", label: "Instagram", fallback: "Coming Soon", Icon: Instagram },
-  { id: "footer.social.tiktok", label: "TikTok", fallback: "https://www.tiktok.com/@getyourdreams.com?_r=1&_t=ZS-96BztL2vBvZ", Icon: Music2 },
-  { id: "footer.social.facebook", label: "Facebook", fallback: "Coming Soon", Icon: Facebook },
-  { id: "footer.social.twitter", label: "Twitter / X", fallback: "Coming soon", Icon: Twitter },
-  { id: "footer.social.linkedin", label: "LinkedIn", fallback: "Coming Soon", Icon: Linkedin },
+  { id: "footer.social.whatsapp_channel", label: "socials.whatsapp_channel", fallback: "https://whatsapp.com/channel/0029VbEKWwnDp2QC77ngL60O", Icon: MessageCircle },
+  { id: "footer.social.whatsapp_group", label: "socials.whatsapp_group", fallback: "https://chat.whatsapp.com/KPggZqVk9Gc63a8NboQzYa", Icon: Users },
+  { id: "footer.social.telegram", label: "socials.telegram", fallback: "https://t.me/+40JIyl-SLqRiYzdl", Icon: Send },
+  { id: "footer.social.instagram", label: "socials.instagram", fallback: "Coming Soon", Icon: Instagram },
+  { id: "footer.social.tiktok", label: "socials.tiktok", fallback: "https://www.tiktok.com/@getyourdreams.com?_r=1&_t=ZS-96BztL2vBvZ", Icon: Music2 },
+  { id: "footer.social.facebook", label: "socials.facebook", fallback: "Coming Soon", Icon: Facebook },
+  { id: "footer.social.twitter", label: "socials.twitter", fallback: "Coming soon", Icon: Twitter },
+  { id: "footer.social.linkedin", label: "socials.linkedin", fallback: "Coming Soon", Icon: Linkedin },
 ];
 
 export default function Footer() {
@@ -25,11 +24,12 @@ export default function Footer() {
   const { translate } = useLanguage();
   const { pages } = useCustomPages();
   const location = useLocation();
-  const [activeLegal, setActiveLegal] = useState<"terms" | "privacy" | null>(null);
+
+
 
   const footerNav = [
-    ...PAGE_NAV_LINKS.map((n) => ({ to: n.to, label: n.label })),
-    ...pages.filter(p => p.show_in_footer).map(p => ({ to: `/p/${p.slug}`, label: p.title })),
+    ...PAGE_NAV_LINKS.map((n) => ({ to: n.to, label: translate(n.key) })),
+    ...pages.filter((p) => p.show_in_footer).map((p) => ({ to: `/p/${p.slug}`, label: getContent(`custom_page.${p.slug}.title`, p.title) })),
   ];
 
   const scrollToTop = () => {
@@ -39,9 +39,10 @@ export default function Footer() {
   const handleNavClick = (to: string) => {
     if (location.pathname === to) {
       scrollToTop();
-    } else {
-      setTimeout(scrollToTop, 100);
+      return;
     }
+
+    setTimeout(scrollToTop, 150);
   };
 
   return (
@@ -64,9 +65,9 @@ export default function Footer() {
                 return (
                   <div key={id} className="flex items-center gap-2 text-xs">
                     <a href={url} target="_blank" rel="noopener noreferrer"
-                       className="flex items-center gap-2 hover:text-accent transition-smooth shrink-0">
+                      className="flex items-center gap-2 hover:text-accent transition-smooth shrink-0">
                       <Icon className="h-4 w-4" />
-                      <span className="font-medium">{label}</span>
+                      <span className="font-medium">{translate(label)}</span>
                     </a>
                     <EditableText id={id} fallback={fallback}
                       className="text-primary-foreground/60 truncate text-[10px] underline-offset-2 hover:underline" />
@@ -104,18 +105,24 @@ export default function Footer() {
               <div className="space-y-1">
                 <div>
                   <EditableText id="footer.email" fallback="info@getyourdreams.com" />
-                  <span className="block text-[10px] text-primary-foreground/60">For general inquiries only</span>
+                  <span className="block text-[10px] text-primary-foreground/60">{translate("footer.general_inquiries_only", "For general inquiries only")}</span>
                 </div>
                 <div>
                   <EditableText id="footer.email_hr" fallback="hr@getyourdreams.com" className="font-semibold text-accent" />
-                  <span className="block text-[10px] text-primary-foreground/60">Send CV, cover letter & supporting documents here</span>
+                  <span className="block text-[10px] text-primary-foreground/60">{translate("footer.send_cv_here", "Send CV, cover letter & supporting documents here")}</span>
                 </div>
               </div>
             </li>
             <li className="flex items-start gap-2">
               <MapPin className="h-4 w-4 mt-0.5 shrink-0" />
               <EditableText id="footer.address"
-                fallback="Head Office: Tiruvannamalai, Tamil Nadu, India&#10;Branch: Dharmapuri, Tamil Nadu, India"
+                fallback="Head Office: Tiruvannamalai, Tamil Nadu, India"
+                multiline />
+            </li>
+            <li className="flex items-start gap-2">
+              <MapPin className="h-4 w-4 mt-0.5 shrink-0" />
+              <EditableText id="footer.address"
+                fallback="Office Branch: Dharmapuri, Tamil Nadu, India"
                 multiline />
             </li>
           </ul>
@@ -123,45 +130,23 @@ export default function Footer() {
 
         <div>
           <h4 className="font-display font-bold mb-4 text-accent">{translate("footer.legal")}</h4>
-          <p className="text-sm text-primary-foreground/80 mb-4">GET YOUR DREAMS values your privacy and is committed to protecting your personal information.</p>
           <ul className="space-y-2 text-sm">
             <li>
-              <button type="button" onClick={() => setActiveLegal(activeLegal === "terms" ? null : "terms")}
-                className="text-left w-full hover:text-accent transition-smooth">
-                {translate("footer.terms_and_conditions")}
-              </button>
+              <Link to="/terms" onClick={() => handleNavClick("/terms")} className="block text-left w-full hover:text-accent transition-smooth">
+                {translate("footer.terms")}
+              </Link>
             </li>
             <li>
-              <button type="button" onClick={() => setActiveLegal(activeLegal === "privacy" ? null : "privacy")}
-                className="text-left w-full hover:text-accent transition-smooth">
-                {translate("footer.privacy_policy")}
-              </button>
+              <Link to="/privacy" onClick={() => handleNavClick("/privacy")} className="block text-left w-full hover:text-accent transition-smooth">
+                {translate("footer.privacy")}
+              </Link>
             </li>
-            <li><Link to="/contact" onClick={() => handleNavClick("/contact")} className="hover:text-accent transition-smooth">{translate("footer.support")}</Link></li>
+            <li>
+              <Link to="/contact" onClick={() => handleNavClick("/contact")} className="hover:text-accent transition-smooth">
+                {translate("footer.support")}
+              </Link>
+            </li>
           </ul>
-          {activeLegal === "terms" && (
-            <div className="mt-4 space-y-2 text-sm text-primary-foreground/80">
-              <p>
-                These Terms describe how GET YOUR DREAMS works, what is expected from users, and the limits on our liability.
-                By using the site, you agree to act responsibly and provide accurate information.
-              </p>
-              <p>
-                We serve job seekers, employers, agencies, and referrers by connecting them through our recruitment platform.
-                Violations may result in restrictions, account suspension, or removal.
-              </p>
-            </div>
-          )}
-          {activeLegal === "privacy" && (
-            <div className="mt-4 space-y-2 text-sm text-primary-foreground/80">
-              <p>
-                GET YOUR DREAMS collects and uses personal information to deliver recruitment services and support your job search.
-                We do not sell your data and only share it with trusted partners when needed to provide our service.
-              </p>
-              <p>
-                You may request corrections, updates, or deletion of your information where legally permitted.
-              </p>
-            </div>
-          )}
         </div>
       </div>
 

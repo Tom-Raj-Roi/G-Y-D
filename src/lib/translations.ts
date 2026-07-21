@@ -3,6 +3,37 @@
 
 type TranslationMap = Record<string, Record<string, string>>;
 
+function getLocaleForLanguage(lang: string): string {
+  switch (lang) {
+    case "ar": return "ar";
+    case "fa": return "fa";
+    case "ur": return "ur";
+    case "hi": return "hi";
+    case "bn": return "bn";
+    case "ta": return "ta";
+    case "te": return "te";
+    case "ml": return "ml";
+    case "kn": return "kn";
+    case "zh": return "zh";
+    case "ja": return "ja";
+    case "ko": return "ko";
+    default: return lang;
+  }
+}
+
+export function localizeText(value: string, lang: string): string {
+  if (!value) return value;
+
+  const locale = getLocaleForLanguage(lang);
+  if (!locale || locale === "en") return value;
+
+  try {
+    return value.replace(/\d+/g, (match) => new Intl.NumberFormat(locale, { useGrouping: false }).format(Number(match)));
+  } catch {
+    return value;
+  }
+}
+
 export const translations: TranslationMap = {
   // Navigation & common
   "nav.home": { en: "Home", es: "Inicio", fr: "Accueil", de: "Startseite", it: "Home", pt: "Início", hi: "होम", ta: "முகப்பு", te: "హోమ్", ml: "ഹോം", kn: "ಮುಖಪುಟ", bn: "হোম", ur: "ہوم", ar: "الرئيسية", fa: "خانه", tr: "Ana Sayfa", ru: "Главная", zh: "首页", ja: "ホーム", ko: "홈", th: "หน้าแรก", vi: "Trang chủ", id: "Beranda", ms: "Laman Utama", tl: "Bahay", sw: "Nyumbani", nl: "Home", pl: "Strona główna", el: "Αρχική" },
@@ -27,6 +58,9 @@ export const translations: TranslationMap = {
   "section.job_referrer.title": { en: "For Job Referrers", es: "Para Referidores", fr: "Pour les Référents", de: "Für Stellenvermittler", hi: "नौकरी संदर्भकर्ताओं के लिए", ar: "لمرشحي الوظائف", ru: "Для Рефералов", zh: "推荐人专区", ja: "紹介者の方へ", ko: "채용추천인을 위하여" },
   "section.agency.title": { en: "For Agencies", es: "Para Agencias", fr: "Pour les Agences", de: "Für Agenturen", hi: "एजेंसियों के लिए", ar: "للوكالات", ru: "Для Агентств", zh: "机构专区", ja: "エージェンシーの方へ", ko: "에이전시를 위하여" },
   "section.contact.title": { en: "Contact Us", es: "Contáctenos", fr: "Contactez-Nous", de: "Kontaktieren Sie Uns", hi: "हमसे संपर्क करें", ar: "اتصل بنا", ru: "Свяжитесь с Нами", zh: "联系我们", ja: "お問い合わせ", ko: "문의하기" },
+  "section.who_we_are.title": { en: "Who We Are", es: "Quiénes Somos", fr: "Qui Nous Sommes", de: "Wer Wir Sind", hi: "हम कौन हैं", ar: "من نحن", ru: "Кто Мы", zh: "我们是谁", ja: "私たちについて", ko: "우리는 누구인가" },
+  "section.our_vision.title": { en: "Our Vision", es: "Nuestra Visión", fr: "Notre Vision", de: "Unsere Vision", hi: "हमारी दृष्टि", ar: "رؤيتنا", ru: "Наше Видение", zh: "我们的愿景", ja: "私たちのビジョン", ko: "우리의 비전" },
+  "section.our_mission.title": { en: "Our Mission", es: "Nuestra Misión", fr: "Notre Mission", de: "Unsere Mission", hi: "हमारा मिशन", ar: "مهمتنا", ru: "Наша Миссия", zh: "我们的使命", ja: "私たちの使命", ko: "우리의 사명" },
 
   // CTA labels
   "cta.learn_more": { en: "Learn more", es: "Más información", fr: "En savoir plus", de: "Mehr erfahren", hi: "और जानें", ar: "اعرف المزيد", ru: "Узнать больше", zh: "了解更多", ja: "詳しく見る", ko: "자세히 보기" },
@@ -43,6 +77,11 @@ export const translations: TranslationMap = {
   "footer.privacy": { en: "Privacy Policy", es: "Política de Privacidad", fr: "Politique de Confidentialité", de: "Datenschutzrichtlinie", hi: "गोपनीयता नीति", ar: "سياسة الخصوصية", ru: "Политика Конфиденциальности", zh: "隐私政策", ja: "プライバシーポリシー", ko: "개인정보 보호정책" },
   "footer.support": { en: "Support", es: "Soporte", fr: "Support", de: "Support", hi: "सहायता", ar: "الدعم", ru: "Поддержка", zh: "支持", ja: "サポート", ko: "지원" },
   "footer.connect": { en: "Connect with us", es: "Conéctese con nosotros", fr: "Connectez-vous avec nous", de: "Verbinden Sie sich mit uns", hi: "हमसे जुड़ें", ar: "تواصل معنا", ru: "Свяжитесь с нами", zh: "与我们联系", ja: "お問い合わせ", ko: "우리와 연결" },
+  "footer.company_name": { en: "GET YOUR DREAMS", es: "GET YOUR DREAMS", fr: "GET YOUR DREAMS", de: "GET YOUR DREAMS", hi: "जीईटी योर ड्रीम्स", ar: "احصل على أحلامك", ru: "GET YOUR DREAMS", zh: "获得梦想", ja: "GET YOUR DREAMS", ko: "당신의 꿈을 이루세요" },
+  "footer.tagline": { en: "Connecting talent with opportunity worldwide. Your dream career starts here.", es: "Conectando talento con oportunidades en todo el mundo. Tu carrera de ensueño comienza aquí.", fr: "Connecter les talents aux opportunités partout dans le monde. Votre carrière de rêve commence ici.", de: "Talente mit Chancen weltweit verbinden. Ihre Traumkarriere beginnt hier.", hi: "विश्वव्यापी अवसरों के साथ प्रतिभा को जोड़ना। आपका सपनों का करियर यहीं शुरू होता है।", ar: "ربط المواهب بالفرص في جميع أنحاء العالم. تبدأ حياتك المهنية المثالية هنا.", ru: "Соединяем таланты с возможностями по всему миру. Ваша карьера мечты начинается здесь.", zh: "把人才与全球机会连接起来。您的梦想事业从这里开始。", ja: "世界中の機会と才能をつなぐ。あなたの夢のキャリアはここから始まります。", ko: "전 세계 기회와 인재를 연결합니다. 당신의 꿈의 경력은 여기서 시작됩니다." },
+  "footer.copyright": { en: "© 2026 GET YOUR DREAMS. All rights reserved.", es: "© 2026 GET YOUR DREAMS. Todos los derechos reservados.", fr: "© 2026 GET YOUR DREAMS. Tous droits réservés.", de: "© 2026 GET YOUR DREAMS. Alle Rechte vorbehalten.", hi: "© 2026 GET YOUR DREAMS. सर्वाधिकार सुरक्षित।", ar: "© 2026 GET YOUR DREAMS. جميع الحقوق محفوظة.", ru: "© 2026 GET YOUR DREAMS. Все права защищены.", zh: "© 2026 GET YOUR DREAMS. 保留所有权利。", ja: "© 2026 GET YOUR DREAMS. All rights reserved.", ko: "© 2026 GET YOUR DREAMS. 모든 권리 보유." },
+  "terms.body": { en: "By using GET YOUR DREAMS, you agree to provide accurate information in all submissions.\n\nWe do not guarantee placement and act solely as a facilitator between candidates, employers, and agencies.\n\nAll personal data is handled in accordance with our privacy policy. You retain ownership of materials you upload.\n\nFor full terms, please contact our team. This text is fully editable from the admin edit mode.", es: "Al usar GET YOUR DREAMS, usted acepta proporcionar información precisa en todas las presentaciones.\n\nNo garantizamos colocación y actuamos únicamente como facilitadores entre candidatos, empleadores y agencias.\n\nTodos los datos personales se manejan de acuerdo con nuestra política de privacidad. Usted conserva la propiedad de los materiales que sube.\n\nPara ver los términos completos, póngase en contacto con nuestro equipo.", fr: "En utilisant GET YOUR DREAMS, vous acceptez de fournir des informations exactes dans toutes vos soumissions.\n\nNous ne garantissons pas de placement et agissons uniquement comme facilitateur entre candidats, employeurs et agences.\n\nToutes les données personnelles sont traitées conformément à notre politique de confidentialité. Vous conservez la propriété des documents que vous téléchargez.\n\nPour les conditions complètes, veuillez contacter notre équipe.", de: "Durch die Nutzung von GET YOUR DREAMS erklären Sie sich damit einverstanden, in allen Einreichungen genaue Informationen bereitzustellen.\n\nWir garantieren keine Platzierung und fungieren nur als Vermittler zwischen Kandidaten, Arbeitgebern und Agenturen.\n\nAlle personenbezogenen Daten werden gemäß unserer Datenschutzrichtlinie verarbeitet. Sie behalten das Eigentum an den von Ihnen hochgeladenen Materialien.\n\nFür vollständige Bedingungen wenden Sie sich bitte an unser Team.", hi: "GET YOUR DREAMS का उपयोग करके, आप सभी प्रस्तुतियों में सटीक जानकारी प्रदान करने के लिए सहमत होते हैं।\n\nहम स्थान की गारंटी नहीं देते और केवल उम्मीदवारों, नियोक्ताओं और एजेंसियों के बीच सहायक के रूप में काम करते हैं।\n\nसभी व्यक्तिगत डेटा हमारी गोपनीयता नीति के अनुसार संभाला जाता है। आप अपने अपलोड किए गए सामग्री के स्वामित्व का अधिकार रखते हैं।\n\nपूर्ण नियमों के लिए, कृपया हमारी टीम से संपर्क करें।", ar: "باستخدام GET YOUR DREAMS، أنت توافق على تقديم معلومات دقيقة في جميع الطلبات.\n\nنحن لا نضمن التوظيف ونعمل فقط كوسيط بين المرشحين وأصحاب العمل والوكالات.\n\nتتم معالجة جميع البيانات الشخصية وفقًا لسياسة الخصوصية الخاصة بنا. تحتفظ بملكية المواد التي تقوم بتحميلها.\n\nللحصول على الشروط الكاملة، يرجى الاتصال بفريقنا.", ru: "Используя GET YOUR DREAMS, вы соглашаетесь предоставлять точную информацию во всех заявках.\n\nМы не гарантируем трудоустройство и действуем только как посредник между кандидатами, работодателями и агентствами.\n\nВсе персональные данные обрабатываются в соответствии с нашей политикой конфиденциальности. Вы сохраняете право собственности на загруженные материалы.\n\nДля полного ознакомления с условиями свяжитесь с нашей командой.", zh: "使用 GET YOUR DREAMS 即表示您同意在所有提交内容中提供准确的信息。\n\n我们不保证职位安置，只作为候选人、雇主和机构之间的协调方。\n\n所有个人数据都将按照我们的隐私政策处理。您保留上传材料的所有权。\n\n如需完整条款，请联系我们的团队。", ja: "GET YOUR DREAMSを利用することで、すべての提出内容に正確な情報を提供することに同意したものとみなされます。\n\n当社は配置を保証せず、候補者、雇用主、代理店の間の仲介役としてのみ活動します。\n\nすべての個人データは当社のプライバシーポリシーに従って処理されます。アップロードした資料の所有権は保持されます。\n\n完全な条件については、当社チームまでお問い合わせください。", ko: "GET YOUR DREAMS를 이용함으로써 모든 제출물에 정확한 정보를 제공하는 데 동의하는 것으로 간주됩니다.\n\n우리는 배치를 보장하지 않으며 후보자, 고용주, 대행사 사이의 촉진자 역할만 수행합니다.\n\n모든 개인 데이터는 당사의 개인정보 보호정책에 따라 처리됩니다. 업로드한 자료에 대한 권리는 유지됩니다.\n\n전체 조건은 저희 팀에 문의해 주세요." },
+  "privacy.body": { en: "Your privacy is important to us. This privacy statement explains the personal data GET YOUR DREAMS processes, how we process it, and for what purposes.", es: "Su privacidad es importante para nosotros. Esta declaración de privacidad explica los datos personales que GET YOUR DREAMS procesa, cómo los procesa y con qué fines.", fr: "Votre vie privée est importante pour nous. Cette déclaration de confidentialité explique les données personnelles que GET YOUR DREAMS traite, comment elles sont traitées et à quelles fins.", de: "Ihre Privatsphäre ist uns wichtig. Diese Datenschutzerklärung erläutert, welche personenbezogenen Daten GET YOUR DREAMS verarbeitet, wie sie verarbeitet werden und zu welchem Zweck.", hi: "आपकी गोपनीयता हमारे लिए महत्वपूर्ण है। यह गोपनीयता विवरण बताता है कि GET YOUR DREAMS कौन-सी व्यक्तिगत डेटा प्रोसेस करता है, इसे कैसे प्रोसेस करता है और किस उद्देश्य से।", ar: "خصوصيتك مهمة بالنسبة لنا. تشرح هذه العبارة الخصوصية البيانات الشخصية التي تعالجها GET YOUR DREAMS وكيفية معالجتها والأغراض التي يتم لأجلها ذلك.", ru: "Ваша конфиденциальность важна для нас. Данная политика конфиденциальности объясняет, какие персональные данные обрабатывает GET YOUR DREAMS, как и для каких целей.", zh: "您的隐私对我们很重要。此隐私声明说明 GET YOUR DREAMS 处理哪些个人数据、如何处理以及出于何种目的。", ja: "お客様のプライバシーは当社にとって重要です。このプライバシー声明では、GET YOUR DREAMS がどのような個人データを処理し、どのように処理し、何のために処理するかを説明します。", ko: "귀하의 개인정보는 저희에게 중요합니다. 이 개인정보 선언은 GET YOUR DREAMS가 어떤 개인 정보를 처리하고, 어떻게 처리하며, 어떤 목적으로 처리하는지 설명합니다." },
 
   // Edit mode
   "edit.active": { en: "Edit mode active — click any text or image to edit. Changes save automatically.", es: "Modo edición activo — haga clic en cualquier texto o imagen para editar.", fr: "Mode édition actif — cliquez sur n'importe quel texte ou image.", de: "Bearbeitungsmodus aktiv — klicken Sie auf Text oder Bild zum Bearbeiten.", hi: "संपादन मोड सक्रिय — संपादित करने के लिए किसी भी टेक्स्ट या छवि पर क्लिक करें।", ar: "وضع التحرير نشط — انقر على أي نص أو صورة للتحرير.", ru: "Режим редактирования активен — нажмите на текст или изображение для редактирования.", zh: "编辑模式已激活 — 点击任何文本或图像进行编辑。", ja: "編集モードがアクティブ — テキストや画像をクリックして編集。", ko: "편집 모드 활성 — 텍스트나 이미지를 클릭하여 편집하세요." },

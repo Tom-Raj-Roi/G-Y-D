@@ -1,6 +1,8 @@
 import { createContext, useContext, useEffect, useState, ReactNode, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "./AuthContext";
+import { useLanguage } from "./LanguageContext";
+import { localizeText, t } from "@/lib/translations";
 
 type ContentMap = Record<string, { value: string; styles: Record<string, string> }>;
 
@@ -19,6 +21,7 @@ const Ctx = createContext<EditorCtx>({} as EditorCtx);
 
 export function EditorProvider({ children }: { children: ReactNode }) {
   const { isAdmin } = useAuth();
+  const { lang } = useLanguage();
   const [editMode, setEditMode] = useState(false);
   const [content, setContent] = useState<ContentMap>({});
 
@@ -36,11 +39,20 @@ export function EditorProvider({ children }: { children: ReactNode }) {
   useEffect(() => { refresh(); }, [refresh]);
   useEffect(() => { if (!isAdmin) setEditMode(false); }, [isAdmin]);
 
-  const getContent = (id: string, fallback: string) => content[id]?.value || fallback;
+  const getContent = useCallback((id: string, fallback: string) => {
+    const localizedKey = `${id}:${lang}`;
+    const localizedDotKey = `${id}.${lang}`;
+    const localizedUnderscoreKey = `${id}_${lang}`;
+    const translatedValue = t(id, lang);
+    const value = content[localizedKey]?.value || content[localizedDotKey]?.value || content[localizedUnderscoreKey]?.value || content[id]?.value || translatedValue || fallback;
+    return localizeText(value, lang);
+  }, [content, lang]);
+
   const getStyles = (id: string) => content[id]?.styles || {};
 
   const saveContent = async (id: string, value: string, styles?: Record<string, string>) => {
-    const payload = { id, value, content_type: "text", styles: styles ?? content[id]?.styles ?? {} };
+    const contentKey = lang === "en" ? id : `${id}:${lang}`;
+    const payload = { id: contentKey, value, content_type: "text", styles: styles ?? content[id]?.styles ?? {} };
     const { error } = await supabase.from("site_content").upsert(payload);
     if (!error) await refresh();
   };

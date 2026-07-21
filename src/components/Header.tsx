@@ -17,7 +17,10 @@ export default function Header() {
   const { isAdmin, signOut } = useAuth();
   const { lang, setLang, translate } = useLanguage();
   const { pages } = useCustomPages();
-  const navItems = [...PAGE_NAV_LINKS, ...pages.filter(p => p.show_in_nav).map(p => ({ to: `/p/${p.slug}`, label: p.title }))];
+  const navItems = [
+    ...PAGE_NAV_LINKS.map(n => ({ to: n.to, label: translate(n.key) })),
+    ...pages.filter(p => p.show_in_nav).map(p => ({ to: `/p/${p.slug}`, label: p.title }))
+  ];
 
   return (
     <header className="sticky top-0 z-50 bg-background/95 backdrop-blur-md border-b shadow-card">
@@ -63,7 +66,7 @@ export default function Header() {
             <span className="flex items-center gap-1">
               <Mail className="h-3.5 w-3.5 text-accent" />
               <EditableText id="header.email_hr" fallback="hr@getyourdreams.com" className="hover:text-primary transition-smooth font-medium" />
-              <span className="text-[10px] text-muted-foreground">(send CV here)</span>
+              <span className="text-[10px] text-muted-foreground">{translate("header.send_cv_here", "(send CV here)")}</span>
             </span>
           </div>
         </div>
@@ -98,13 +101,13 @@ export default function Header() {
               {isAdmin && (
                 <>
                   <DropdownMenuItem asChild>
-                    <NavLink to="/admin"><Settings className="h-4 w-4 mr-2" />Admin Dashboard</NavLink>
+                    <NavLink to="/admin"><Settings className="h-4 w-4 mr-2" />{translate("header.admin_dashboard", "Admin Dashboard")}</NavLink>
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={toggleEditMode}>
-                    <Pencil className="h-4 w-4 mr-2" />{editMode ? "Stop editing" : "Edit page"}
+                    <Pencil className="h-4 w-4 mr-2" />{editMode ? translate("header.stop_editing", "Stop editing") : translate("header.edit_page", "Edit page")}
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={signOut}>
-                    <LogOut className="h-4 w-4 mr-2" />Sign out
+                    <LogOut className="h-4 w-4 mr-2" />{translate("header.sign_out", "Sign out")}
                   </DropdownMenuItem>
                 </>
               )}

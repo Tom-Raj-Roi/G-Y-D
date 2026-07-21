@@ -42,7 +42,7 @@ export const DEFAULT_SECTIONS: Section[] = [
     id: "410",
     key: "disclaimer",
     title: "Disclaimer",
-    body: `Disclaimer & Terms of Use
+    body: `
 
 * This platform/service is completely free of charge. No upfront payment is required from job seekers or employers.
 

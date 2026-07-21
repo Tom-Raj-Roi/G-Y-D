@@ -340,7 +340,7 @@ If you are not fully committed, or if your inquiry is only for formality or casu
 Please note that we do not charge fees for initiating your process, so there is no financial risk from your side. However, any complications, losses, or issues arising during the process are borne by us. Therefore, we expect mutual understanding, responsibility, and cooperation.
 
 We appreciate your understanding and look forward to working with sincere and dedicated individuals who are ready to take meaningful steps toward their future.', 3),
-  ('job_referrer', 'For Job Referrers', 'Dear Job Referrer,
+  ('job_referrer', 'For Job Referrers', '
 
 We are reaching out to individuals and organizations who are interested in collaborating with us by referring genuine job opportunities for job seekers.
 
@@ -375,7 +375,7 @@ We do not charge candidates for initiating the process, meaning there is no fina
 We value our time and resources and prefer to invest them in meaningful and productive collaborations. We hope you understand and respect our guidelines.
 
 We look forward to working with trusted and genuine job referrers who are committed to maintaining professional standards and delivering real opportunities.', 4),
-  ('agency', 'For Agencies', 'Dear Recruitment Agencies,
+  ('agency', 'For Agencies', '
 
 We are reaching out to agencies interested in collaborating with us for providing genuine job opportunities to candidates.
 

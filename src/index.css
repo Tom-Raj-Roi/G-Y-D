@@ -1,8 +1,11 @@
-﻿
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 @layer base {
   :root {
     /* Brand */
-    --background: 210 40% 96.1%; /* slate-100 */
+    --background: 210 40% 96.1%;
     --foreground: 222 47% 11%;
 
     --card: 0 0% 100%;
@@ -127,4 +130,3 @@
   0%,100% { transform: translateY(0); }
   50%     { transform: translateY(-10px); }
 }
-

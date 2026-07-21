@@ -8,6 +8,7 @@ import { Link } from "react-router-dom";
 import { ArrowRight, Sparkles, Briefcase, Users, Building2, Phone, Globe, Award, Shield, CheckCircle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { DEFAULT_SECTIONS } from "@/lib/content";
 
 // Import hero image from assets
 import heroImage from "@/assets/hero.jpg";
@@ -31,6 +32,7 @@ interface Section {
   body: string | null;
   position: number;
   image_url?: string | null;
+  visible?: boolean;
 }
 
 const SECTION_CTA_KEYS: Record<string, { key: string; to: string }> = {
@@ -52,66 +54,6 @@ const SECTION_IMAGES: Record<string, string> = {
   our_vision: imgOurVision,
   our_mission: imgOurMission,
 };
-
-// SEED initial site sections (coding number 290 to 409)
-const DEFAULT_SECTIONS: Section[] = [
-  {
-    id: "290",
-    key: "who_we_are",
-    title: "Who We Are",
-    body: "GET YOUR DREAMS (GYD) is a professional recruitment and career consulting organization dedicated to bridging the gap between talented individuals and global employment opportunities. Founded with a vision to transform lives through meaningful career connections, we operate with integrity, transparency, and a commitment to excellence. Our team comprises experienced HR professionals, career counselors, and industry experts who understand the evolving job market dynamics across multiple sectors and geographies.",
-    position: 1,
-  },
-  {
-    id: "291",
-    key: "our_vision",
-    title: "Our Vision",
-    body: "To become the most trusted global recruitment partner, empowering individuals to achieve their career aspirations while helping organizations build exceptional teams. We envision a world where geographical boundaries do not limit career growth, and every qualified professional has access to opportunities that match their skills and ambitions. Our goal is to create lasting impact by facilitating career transformations that benefit individuals, families, and communities worldwide.",
-    position: 2,
-  },
-  {
-    id: "292",
-    key: "our_mission",
-    title: "Our Mission",
-    body: "Our mission is to provide ethical, transparent, and reliable recruitment services that connect job seekers with genuine employment opportunities across the globe. We are committed to: (1) Maintaining the highest standards of professional integrity in all our dealings, (2) Providing accurate and honest information about job opportunities, (3) Supporting candidates throughout their career journey with guidance and resources, (4) Building long-term relationships with employers who share our values, and (5) Continuously improving our services to meet the evolving needs of the job market.",
-    position: 3,
-  },
-  {
-    id: "300",
-    key: "our_services",
-    title: "Our Services",
-    body: "GET YOUR DREAMS provides comprehensive recruitment and career support services designed to meet the diverse needs of job seekers and employers. Our services include: International Job Placement - connecting candidates with verified employers across Gulf countries, Europe, and other international destinations; Resume Building & Optimization - professional CV writing services that highlight your strengths; Interview Preparation - coaching sessions to help you succeed in interviews; Document Processing Support - guidance on visa, attestation, and travel documentation; Career Counseling - personalized advice to help you make informed career decisions; and Employer Partnership Programs - helping companies find the right talent efficiently.",
-    position: 4,
-  },
-  {
-    id: "350",
-    key: "job_seekers",
-    title: "For Job Seekers",
-    body: "Are you ready to take the next step in your career? GET YOUR DREAMS is here to support you every step of the way. We work with job seekers from all backgrounds - whether you are a fresh graduate looking for your first opportunity, an experienced professional seeking better prospects, or someone looking to work abroad. Our dedicated team will help you identify suitable opportunities, prepare your application materials, and guide you through the entire recruitment process. We only work with verified employers and genuine job openings, ensuring your job search is safe and productive.",
-    position: 5,
-  },
-  {
-    id: "380",
-    key: "job_referrer",
-    title: "Become a Job Referrer",
-    body: "Do you know talented individuals who are looking for jobs? Join our Job Referrer Network and earn rewards for successful placements! As a GYD Job Referrer, you can help connect qualified candidates with our job opportunities while earning referral bonuses. This program is ideal for HR professionals, community leaders, educational institution staff, and anyone with a network of job-seeking individuals. We provide you with all the information and support you need to make successful referrals. Together, we can help more people achieve their career dreams.",
-    position: 6,
-  },
-  {
-    id: "400",
-    key: "agency",
-    title: "Partner With Us - Agencies",
-    body: "Are you a recruitment agency looking to expand your reach and offer more opportunities to your candidates? Partner with GET YOUR DREAMS to access our extensive network of international employers and job openings. We welcome collaborations with registered recruitment agencies, manpower consultancies, and HR service providers. Our partnership model is designed to be mutually beneficial - you bring your candidate network, and we provide access to verified job opportunities, documentation support, and placement assistance. Together, we can serve more candidates and create more success stories.",
-    position: 7,
-  },
-  {
-    id: "409",
-    key: "contact",
-    title: "Get in Touch",
-    body: "We would love to hear from you! Whether you are a job seeker looking for opportunities, an employer seeking talent, or a potential partner interested in collaboration, our team is ready to assist you. Reach out to us through any of our contact channels, and we will respond promptly. For job applications, please send your CV, cover letter, and supporting documents to our HR email. For general inquiries and partnerships, use our info email. You can also connect with us on our social media channels for the latest updates and job postings.",
-    position: 8,
-  },
-];
 
 export default function Index() {
   const [sections, setSections] = useState<Section[]>(DEFAULT_SECTIONS);
@@ -247,7 +189,7 @@ export default function Index() {
 
       {/* Content Sections */}
       <div className="container mx-auto px-4 py-20 space-y-28">
-        {sections.map((s, i) => {
+        {sections.filter(s => s.visible !== false).map((s, i) => {
           const img = s.image_url || SECTION_IMAGES[s.key] || imgServices;
           const ctaInfo = SECTION_CTA_KEYS[s.key];
           const reverse = i % 2 === 1;

@@ -22,15 +22,17 @@ export default function OurServices() {
             as="p" className="text-xl text-muted-foreground" multiline />
           <div className="grid md:grid-cols-2 gap-6 mt-8">
             {[
-              { id: "services.card1.title", title: "International Placements", id2: "services.card1.body", body: "Placements across Saudi Arabia, UAE, Europe, and beyond." },
-              { id: "services.card2.title", title: "Career Counselling", id2: "services.card2.body", body: "One-on-one guidance to help you choose the right path." },
-              { id: "services.card3.title", title: "Document & Visa Support", id2: "services.card3.body", body: "Full assistance with paperwork, certifications, and visa processing." },
-              { id: "services.card4.title", title: "Employer Hiring Solutions", id2: "services.card4.body", body: "Curated talent pools matched to your company's needs." },
-            ].map((c) => (
-              <div key={c.id} className="p-6 rounded-xl bg-card shadow-card border hover:shadow-elegant transition-smooth">
-                <EditableText id={c.id} fallback={c.title} as="h3" className="font-display font-bold text-xl text-primary mb-2" />
-                <EditableText id={c.id2} fallback={c.body} as="p" className="text-muted-foreground" multiline />
-              </div>
+              { id: "services.card1", title: "International Placements", body: "Placements across Saudi Arabia, UAE, Europe, and beyond." },
+              { id: "services.card2", title: "Career Counselling", body: "One-on-one guidance to help you choose the right path." },
+              { id: "services.card3", title: "Document & Visa Support", body: "Full assistance with paperwork, certifications, and visa processing." },
+              { id: "services.card4", title: "Employer Hiring Solutions", body: "Curated talent pools matched to your company's needs." },
+            ].map((c, i) => (
+              <Reveal key={c.id} direction="up" delay={i * 100}>
+                <div className="p-6 rounded-xl bg-card shadow-card border hover:shadow-elegant transition-smooth h-full">
+                  <EditableText id={`${c.id}.title`} fallback={c.title} as="h3" className="font-display font-bold text-xl text-primary mb-2" />
+                  <EditableText id={`${c.id}.body`} fallback={c.body} as="p" className="text-muted-foreground" multiline />
+                </div>
+              </Reveal>
             ))}
           </div>
         </div>

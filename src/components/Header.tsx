@@ -8,28 +8,16 @@ import EditableImage from "./EditableImage";
 import { useEditor } from "@/contexts/EditorContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { LANGUAGES, useLanguage } from "@/contexts/LanguageContext";
+import { PAGE_NAV_LINKS } from "./PageNav";
 import { useCustomPages } from "@/hooks/useCustomPages";
 import logoFallback from "@/assets/company-logo.jpg";
-
-const NAV_KEYS = [
-  { to: "/", key: "nav.home" },
-  { to: "/our-services", key: "nav.our_services" },
-  { to: "/job-seekers", key: "nav.job_seekers" },
-  { to: "/job-referrer", key: "nav.job_referrer" },
-  { to: "/current-vacancy", key: "nav.current_vacancy" },
-  { to: "/agency", key: "nav.agency" },
-  { to: "/contact", key: "nav.contact" },
-];
 
 export default function Header() {
   const { editMode, toggleEditMode } = useEditor();
   const { isAdmin, signOut } = useAuth();
   const { lang, setLang, translate } = useLanguage();
   const { pages } = useCustomPages();
-  const navItems = [
-    ...NAV_KEYS.map((n) => ({ to: n.to, label: translate(n.key) })),
-    ...pages.filter(p => p.show_in_nav).map(p => ({ to: `/p/${p.slug}`, label: p.title })),
-  ];
+  const navItems = [...PAGE_NAV_LINKS, ...pages.filter(p => p.show_in_nav).map(p => ({ to: `/p/${p.slug}`, label: p.title }))];
 
   return (
     <header className="sticky top-0 z-50 bg-background/95 backdrop-blur-md border-b shadow-card">

@@ -4,19 +4,10 @@ import { Mail, Phone, MapPin, Facebook, Twitter, Linkedin, Instagram, MessageCir
 import { useEditor } from "@/contexts/EditorContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useCustomPages } from "@/hooks/useCustomPages";
+import { PAGE_NAV_LINKS } from "./PageNav";
 import EditableText from "./EditableText";
 import EditableImage from "./EditableImage";
 import logoFallback from "@/assets/company-logo.jpg";
-
-const NAV_KEYS = [
-  { to: "/", key: "nav.home" },
-  { to: "/our-services", key: "nav.our_services" },
-  { to: "/job-seekers", key: "nav.job_seekers" },
-  { to: "/job-referrer", key: "nav.job_referrer" },
-  { to: "/current-vacancy", key: "nav.current_vacancy" },
-  { to: "/agency", key: "nav.agency" },
-  { to: "/contact", key: "nav.contact" },
-];
 
 const SOCIALS: { id: string; label: string; fallback: string; Icon: React.ComponentType<{ className?: string }> }[] = [
   { id: "footer.social.whatsapp_channel", label: "WhatsApp Channel", fallback: "https://whatsapp.com/channel/0029VbEKWwnDp2QC77ngL60O", Icon: MessageCircle },
@@ -37,7 +28,7 @@ export default function Footer() {
   const [activeLegal, setActiveLegal] = useState<"terms" | "privacy" | null>(null);
 
   const footerNav = [
-    ...NAV_KEYS.map((n) => ({ to: n.to, label: translate(n.key) })),
+    ...PAGE_NAV_LINKS.map((n) => ({ to: n.to, label: n.label })),
     ...pages.filter(p => p.show_in_footer).map(p => ({ to: `/p/${p.slug}`, label: p.title })),
   ];
 

@@ -1,4 +1,4 @@
-interface Section {
+export interface Section {
   id: string;
   key: string;
   title: string;
@@ -8,13 +8,81 @@ interface Section {
   visible?: boolean;
 }
 
+export const mergeSiteSections = (dbSections: Partial<Section>[]): Section[] => {
+  const defaults = DEFAULT_SECTIONS.map((section) => ({ ...section }));
+  const merged = new Map<string, Section>();
+
+  defaults.forEach((section) => merged.set(section.key, section));
+
+  (dbSections || []).forEach((section) => {
+    if (!section?.key) return;
+
+    const existing = merged.get(section.key);
+    if (!existing) {
+      merged.set(section.key, section as Section);
+      return;
+    }
+
+    merged.set(section.key, {
+      ...existing,
+      ...section,
+      title: section.title?.trim() ? section.title : existing.title,
+      body: section.body?.toString().trim() ? section.body : existing.body,
+      visible: section.visible ?? existing.visible,
+      image_url: section.image_url ?? existing.image_url,
+    });
+  });
+
+  return Array.from(merged.values()).sort((a, b) => a.position - b.position);
+};
+
 // SEED initial site sections (coding number 290 to 409)
 export const DEFAULT_SECTIONS: Section[] = [
+  {
+    id: "410",
+    key: "disclaimer",
+    title: "Disclaimer",
+    body: `Disclaimer & Terms of Use
+
+* This platform/service is completely free of charge. No upfront payment is required from job seekers or employers.
+
+* Employers or company representatives may refer job vacancies through this platform, and job seekers can explore and apply for suitable opportunities.
+
+* Once an employer or referring agent identifies a suitable candidate, they may proceed with their own selection and hiring process independently.
+
+* If a candidate is successfully hired, the person who referred the opportunity may choose to: Offer the referral free of cost, or Request a referral reward from the candidate (optional and mutually agreed).
+
+* Any referral reward or payment must be made only after the candidate has officially joined the company.
+
+* Do not make any payment before joining.
+
+* Candidates who secure a job through a referral are encouraged (but not legally required) to refer other job seekers within their network.
+
+* If any candidate chooses to pay money before joining a job, and suffers any loss, we are not responsible for such transactions.
+
+* Candidates must independently verify the authenticity of job offers, including offer letters, company details, and employment terms.
+
+* We are not responsible for fake or misleading job offers.
+
+* We act only as a platform for connecting job seekers and referrers. We are not involved in hiring decisions or employment contracts.
+
+* Any agreement regarding referral rewards is strictly between the candidate and the referrer. We are not a party to such agreements.
+
+* Users must ensure that all information shared (resume, job details, company info) is accurate and truthful.
+
+* Any misuse of the platform, including scams, false job postings, or misleading information, may result in removal or restriction of access.
+
+* We reserve the right to modify these terms at any time without prior notice.`,
+    position: 2,
+    visible: true,
+  },
   {
     id: "290",
     key: "who_we_are",
     title: "Who We Are",
-    body: "GET YOUR DREAMS (GYD) is a professional recruitment and career consulting organization dedicated to bridging the gap between talented individuals and global employment opportunities. Founded with a vision to transform lives through meaningful career connections, we operate with integrity, transparency, and a commitment to excellence. Our team comprises experienced HR professionals, career counselors, and industry experts who understand the evolving job market dynamics across multiple sectors and geographies.",
+    body: `GET YOUR DREAMS (GYD) is a global recruitment and career development platform dedicated to connecting talented professionals with trusted employers worldwide. We bridge the gap between job seekers, recruitment agencies, referral partners, and organizations by providing a streamlined and transparent hiring experience.
+
+Our mission is to help individuals achieve their career goals while supporting businesses in finding the right talent to drive growth and success.`,
     position: 1,
     visible: true,
   },
@@ -22,7 +90,9 @@ export const DEFAULT_SECTIONS: Section[] = [
     id: "291",
     key: "our_vision",
     title: "Our Vision",
-    body: "To become the most trusted global recruitment partner, empowering individuals to achieve their career aspirations while helping organizations build exceptional teams. We envision a world where geographical boundaries do not limit career growth, and every qualified professional has access to opportunities that match their skills and ambitions. Our goal is to create lasting impact by facilitating career transformations that benefit individuals, families, and communities worldwide.",
+    body: `To become a leading global recruitment platform that transforms how people find jobs and how organizations hire talent, creating opportunities without borders.
+
+We envision a future where every individual can access meaningful career opportunities and every employer can find the right talent quickly and efficiently.`,
     position: 2,
     visible: true,
   },
@@ -30,7 +100,15 @@ export const DEFAULT_SECTIONS: Section[] = [
     id: "292",
     key: "our_mission",
     title: "Our Mission",
-    body: "Our mission is to provide ethical, transparent, and reliable recruitment services that connect job seekers with genuine employment opportunities across the globe. We are committed to: (1) Maintaining the highest standards of professional integrity in all our dealings, (2) Providing accurate and honest information about job opportunities, (3) Supporting candidates throughout their career journey with guidance and resources, (4) Building long-term relationships with employers who share our values, and (5) Continuously improving our services to meet the evolving needs of the job market.",
+    body: `To empower job seekers by providing access to global career opportunities and to help employers discover qualified talent through a reliable, efficient, and innovative recruitment ecosystem.
+
+We strive to:
+
+Connect talent with opportunities worldwide.
+Simplify the hiring process for employers and candidates.
+Support career growth through guidance and professional networking.
+Build long-term partnerships based on trust and transparency.
+Create a positive impact on the global workforce.`,
     position: 3,
     visible: true,
   },
@@ -38,13 +116,14 @@ export const DEFAULT_SECTIONS: Section[] = [
     id: "300",
     key: "our_services",
     title: "Our Services",
-    body: `OUR SERVICE  We act as a bridge between job seekers and employers who are willing to refer candidates for suitable opportunities. Our platform is completely free to use — there are no charges or hidden fees at any stage.
+    body: `We act as a bridge between job seekers and employers who are willing to refer candidates for suitable opportunities. Our platform is completely free to use — there are no charges or hidden fees at any stage.
 
 If a job seeker successfully secures a position through a referral, they may choose to offer a referral reward based on mutual agreement with the referrer. However, this is entirely optional. If the job seeker does not wish to provide any reward, they are under no obligation to pay — the service remains 100% free.
 
 Our platform operates at both domestic and international levels, with a special focus on supporting IT job seekers looking for opportunities abroad across various countries.
 
-We encourage all users to utilize this platform responsibly, professionally, and with genuine intent. This initiative is built on trust, transparency, and the goal of helping individuals achieve their career dreams.`,
+We encourage all users to utilize this platform responsibly, professionally, and with genuine intent. This initiative is built on trust, transparency, and the goal of helping individuals achieve their career dreams.
+`,
     position: 4,
     visible: true,
   },
@@ -124,8 +203,14 @@ We look forward to working with trusted and genuine job referrers who are commit
     id: "409",
     key: "contact",
     title: "Get in Touch",
-    body: "We would love to hear from you! Whether you are a job seeker looking for opportunities, an employer seeking talent, or a potential partner interested in collaboration, our team is ready to assist you. Reach out to us through any of our contact channels, and we will respond promptly. For job applications, please send your CV, cover letter, and supporting documents to our HR email. For general inquiries and partnerships, use our info email. You can also connect with us on our social media channels for the latest updates and job postings.",
+    body: `We would be delighted to hear from you. Whether you are a job seeker exploring new career opportunities, an employer seeking qualified talent, or a prospective partner interested in collaboration, our dedicated team is here to assist you.
+
+Please feel free to contact us through any of our communication channels, and we will respond as promptly as possible. Job seekers are encouraged to submit their CV/resume, cover letter, and any relevant supporting documents to our HR email for review. For general inquiries, business partnerships, or additional information about our services, please reach out through our official information email.
+
+You can also follow and connect with us on our social media platforms to stay informed about the latest job opportunities, industry insights, company updates, and recruitment announcements.
+We would love to hear from you! Whether you are a job seeker looking for opportunities, an employer seeking talent, or a potential partner interested in collaboration, our team is ready to assist you. Reach out to us through any of our contact channels, and we will respond promptly. For job applications, please send your CV, cover letter, and supporting documents to our HR email. For general inquiries and partnerships, use our info email. You can also connect with us on our social media channels for the latest updates and job postings.`,
     position: 8,
     visible: true,
   },
+  
 ];

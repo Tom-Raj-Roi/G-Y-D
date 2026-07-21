@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import Layout from "@/components/Layout";
 import EditableText from "@/components/EditableText";
 import EditableImage from "@/components/EditableImage";
@@ -6,7 +6,6 @@ import ReadMore from "@/components/ReadMore";
 import Reveal from "@/components/Reveal";
 import { Link } from "react-router-dom";
 import { ArrowRight, Sparkles, Briefcase, Users, Building2, Phone, Globe, Award, Shield, CheckCircle } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { DEFAULT_SECTIONS } from "@/lib/content";
 
@@ -14,16 +13,16 @@ import { DEFAULT_SECTIONS } from "@/lib/content";
 import heroImage from "@/assets/hero.jpg";
 
 // Local image placeholders - drop your JPG/PNG files into src/assets and import them here
-import imgDisclaimer from "@/assets/hero.jpg";
-import imgServices from "@/assets/hero.jpg";
-import imgSeekers from "@/assets/hero.jpg";
-import imgReferrer from "@/assets/hero.jpg";
-import imgAgency from "@/assets/hero.jpg";
-import imgContact from "@/assets/hero.jpg";
-import imgEmployerNote from "@/assets/hero.jpg";
-import imgWhoWeAre from "@/assets/hero.jpg";
-import imgOurVision from "@/assets/hero.jpg";
-import imgOurMission from "@/assets/hero.jpg";
+import imgDisclaimer from "@/assets/section-disclaimer.jpg";
+import imgServices from "@/assets/section-services.jpg";
+import imgSeekers from "@/assets/section-seekers.jpg";
+import imgReferrer from "@/assets/section-referrer.jpg";
+import imgAgency from "@/assets/section-agency.jpg";
+import imgContact from "@/assets/section-contact.jpg";
+import imgEmployerNote from "@/assets/section-employer-note.jpg";
+import imgWhoWeAre from "@/assets/who we are.jpg";
+import imgOurVision from "@/assets/our vision.jpg";
+import imgOurMission from "@/assets/our mission.jpg";
 
 interface Section {
   id: string;
@@ -56,18 +55,8 @@ const SECTION_IMAGES: Record<string, string> = {
 };
 
 export default function Index() {
-  const [sections, setSections] = useState<Section[]>(DEFAULT_SECTIONS);
+  const [sections] = useState<Section[]>(DEFAULT_SECTIONS);
   const { translate } = useLanguage();
-
-  useEffect(() => {
-    supabase.from("site_sections").select("*").order("position").then(({ data, error }) => {
-      if (data && data.length > 0) {
-        setSections(data);
-      } else if (error) {
-        console.log("[v0] Using default sections - Supabase not connected or no data");
-      }
-    });
-  }, []);
 
   return (
     <Layout>
@@ -90,7 +79,7 @@ export default function Index() {
             />
             <EditableText 
               id="hero.subtitle" 
-              fallback="GET YOUR DREAMS connects ambitious talent with leading employers across the globe. Whether you're seeking opportunity or looking to hire, your journey starts here."
+              fallback="GET YOUR DREAMS (GYD) creates relevant job opportunities and workforce solutions across a variety of industries by matching qualified workers with reliable companies worldwide. We are dedicated to helping you succeed at every stage, whether you are an employer looking for outstanding talent or a job seeker pursuing your next professional milestone. This is where your path to development, opportunity, and success starts."
               as="p" 
               className="text-lg md:text-xl lg:text-2xl text-primary-foreground/90 leading-relaxed animate-slide-left" 
               multiline 
@@ -152,7 +141,7 @@ export default function Index() {
           <div className="text-center max-w-3xl mx-auto mb-16">
             <Reveal>
               <EditableText id="home.why_choose.title" fallback="Why Choose GET YOUR DREAMS?" as="h2" className="font-display font-bold text-3xl md:text-4xl text-gradient mb-4" />
-              <EditableText id="home.why_choose.subtitle" fallback="We are committed to your success with ethical practices, transparent processes, and genuine opportunities." as="p" className="text-muted-foreground text-lg" multiline />
+              <EditableText id="home.why_choose.subtitle" fallback="Through honesty, openness, and moral hiring procedures, we are committed to supporting your achievement. We are dedicated to offering trustworthy advice, equitable procedures, and real chances that enable people and businesses to confidently accomplish their objectives." as="p" className="text-muted-foreground text-lg" multiline />
             </Reveal>
           </div>
           <div className="grid md:grid-cols-3 gap-8">
@@ -162,7 +151,7 @@ export default function Index() {
                   <Shield className="h-7 w-7 text-primary" />
                 </div>
                 <EditableText id="home.feature1.title" fallback="100% Verified Jobs" as="h3" className="font-display font-bold text-xl mb-3" />
-                <EditableText id="home.feature1.body" fallback="Every job opportunity we share is thoroughly verified. We never promote fake or misleading job offers." as="p" className="text-muted-foreground" multiline />
+                <EditableText id="home.feature1.body" fallback="To guarantee legitimacy and dependability, every job opportunity listed on our platform goes through a rigorous verification process. We don't advertise, support, or publish false, deceptive, or unconfirmed employment offers because we are dedicated to upholding the greatest standards of integrity and openness." as="p" className="text-muted-foreground" multiline />
               </div>
             </Reveal>
             <Reveal direction="up">
@@ -171,7 +160,8 @@ export default function Index() {
                   <Award className="h-7 w-7 text-primary" />
                 </div>
                 <EditableText id="home.feature2.title" fallback="Expert Guidance" as="h3" className="font-display font-bold text-xl mb-3" />
-                <EditableText id="home.feature2.body" fallback="Our experienced team provides personalized career counseling, resume support, and interview preparation." as="p" className="text-muted-foreground" multiline />
+                <EditableText id="home.feature2.body" fallback="Our experienced professionals provide personalized career guidance, resume enhancement support, and interview preparation services to help candidates present their strengths effectively and achieve their career objectives with confidence.
+" as="p" className="text-muted-foreground" multiline />
               </div>
             </Reveal>
             <Reveal direction="up">
@@ -180,7 +170,8 @@ export default function Index() {
                   <CheckCircle className="h-7 w-7 text-primary" />
                 </div>
                 <EditableText id="home.feature3.title" fallback="Transparent Process" as="h3" className="font-display font-bold text-xl mb-3" />
-                <EditableText id="home.feature3.body" fallback="Clear communication at every step. No hidden charges, no false promises - just honest recruitment services." as="p" className="text-muted-foreground" multiline />
+                <EditableText id="home.feature3.body" fallback="We believe in clear and transparent communication throughout every stage of the recruitment process. With no hidden fees, misleading information, or unrealistic promises, we are committed to delivering honest, ethical, and professional recruitment services that you can trust.
+" as="p" className="text-muted-foreground" multiline />
               </div>
             </Reveal>
           </div>
@@ -215,7 +206,7 @@ export default function Index() {
                     <div className="space-y-4 text-base text-foreground/85">
                       <EditableText 
                         id="home.contact.intro"
-                        fallback="Reach out to us — we're here to help with any inquiry, partnership or career support."
+                        fallback="Reach out to us — We welcome the opportunity to assist you. Whether you have a general inquiry, are interested in a partnership, or require career guidance and support, our team is here to provide prompt, professional, and reliable assistance every step of the way."
                         as="p" 
                         multiline 
                       />
@@ -233,7 +224,7 @@ export default function Index() {
                         </p>
                         <div className="pt-2 flex items-center gap-2">
                           <Phone className="h-4 w-4 text-primary" />
-                          <span className="font-medium">+966 55 239 0860 | +91 6374 504 413 | +91 9597589990</span>
+                          <span className="font-medium">+966 552390860 | +91 6374504413 | +91 9597589990</span>
                         </div>
                       </div>
                     </div>

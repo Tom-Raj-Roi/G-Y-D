@@ -57,8 +57,8 @@ export default function JobSeekers() {
           <Mail className="h-5 w-5 text-primary shrink-0 mt-0.5" />
           <div>
             <strong>{translate("job_seekers.important.title", "Important:")}</strong> {translate("job_seekers.important.body1", "Please send your")} <strong>{translate("job_seekers.important.body2", "CV, cover letter, and supporting documents")}</strong> {translate("job_seekers.important.body3", "to")}{" "}
-            <a href="mailto:hr@getyourdreams.com" className="text-primary font-semibold underline">hr@getyourdreams.com</a>.
-            {translate("job_seekers.important.body4", "Use")} <a href="mailto:info@getyourdreams.com" className="text-primary underline">info@getyourdreams.com</a> {translate("job_seekers.important.body5", "only for general inquiries.")}
+            <a href="mailto:hr@getyourdreams.xyz" className="text-primary font-semibold underline">hr@getyourdreams.xyz</a> or <a href="mailto:admin@getyourdreams.xyz" className="text-primary font-semibold underline">admin@getyourdreams.xyz</a> <span className="text-xs text-muted-foreground">({translate("contact.emergency_only", "contact only for emergency")})</span>.
+            {translate("job_seekers.important.body4", "Use")} <a href="mailto:info@getyourdreams.xyz" className="text-primary underline">info@getyourdreams.xyz</a> {translate("job_seekers.important.body5", "only for general inquiries.")}
             {translate("job_seekers.important.body6", "Always mention your full name and the position you are applying for in the subject.")}
           </div>
         </div>

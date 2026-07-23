@@ -214,14 +214,18 @@ export default function Index() {
                       <div className="rounded-xl border bg-muted/30 p-6 space-y-3">
                         <div className="flex items-start gap-2">
                           <span className="font-semibold text-primary">{translate("home.contact.general_inquiries", "General inquiries:")}</span>
-                          <a href="mailto:info@getyourdreams.com" className="text-primary underline">info@getyourdreams.com</a>
+                          <a href="mailto:info@getyourdreams.xyz" className="text-primary underline">info@getyourdreams.xyz</a>
                         </div>
                         <div className="flex items-start gap-2">
                           <span className="font-semibold text-accent">{translate("home.contact.cv_documents", "CV & Documents:")}</span>
-                          <a href="mailto:hr@getyourdreams.com" className="text-accent font-semibold underline">hr@getyourdreams.com</a>
+                          <a href="mailto:hr@getyourdreams.xyz" className="text-accent font-semibold underline">hr@getyourdreams.xyz</a>
+                        </div>
+                        <div className="flex items-start gap-2">
+                          <span className="font-semibold text-primary">{translate("home.contact.admin_contact", "Admin Contact:")}</span>
+                          <a href="mailto:admin@getyourdreams.xyz" className="text-primary underline">admin@getyourdreams.xyz</a> <span className="text-xs text-muted-foreground">({translate("contact.emergency_only", "contact only for emergency")})</span>
                         </div>
                         <div className="text-xs text-muted-foreground bg-muted/50 rounded-lg p-3 mt-3">
-                          <EditableText id="home.contact.note" fallback="Please use the info mailbox only for inquiries. All applications and documents must be sent to hr@getyourdreams.com." />
+                          <EditableText id="home.contact.note" fallback="Please use the info mailbox only for inquiries. All applications and documents must be sent to hr@getyourdreams.xyz." />
                         </div>
                         <div className="pt-2 flex items-center gap-2">
                           <Phone className="h-4 w-4 text-primary" />

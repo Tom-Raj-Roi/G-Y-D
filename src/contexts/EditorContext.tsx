@@ -2,7 +2,6 @@ import { createContext, useContext, useEffect, useState, ReactNode, useCallback 
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "./AuthContext";
 import { useLanguage } from "./LanguageContext";
-import { localizeText, t } from "@/lib/translations";
 
 type ContentMap = Record<string, { value: string; styles: Record<string, string> }>;
 
@@ -42,10 +41,8 @@ export function EditorProvider({ children }: { children: ReactNode }) {
   const getContent = useCallback((id: string, fallback: string) => {
     const localizedKey = `${id}:${lang}`;
     const localizedDotKey = `${id}.${lang}`;
-    const localizedUnderscoreKey = `${id}_${lang}`;
-    const translatedValue = t(id, lang);
-    const value = content[localizedKey]?.value || content[localizedDotKey]?.value || content[localizedUnderscoreKey]?.value || content[id]?.value || translatedValue || fallback;
-    return localizeText(value, lang);
+    const value = content[localizedKey]?.value || content[localizedDotKey]?.value || content[id]?.value || fallback;
+    return value;
   }, [content, lang]);
 
   const getStyles = (id: string) => content[id]?.styles || {};

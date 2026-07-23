@@ -1,5 +1,6 @@
-import { createContext, useContext, useEffect, useState, ReactNode, useCallback } from "react";
-import { t } from "@/lib/translations";
+import { createContext, useContext, ReactNode, useCallback } from "react";
+import { useTranslation } from "react-i18next";
+import { TFunction } from "i18next";
 
 export const LANGUAGES = [
   { code: "en", name: "English" },
@@ -34,20 +35,21 @@ export const LANGUAGES = [
   { code: "el", name: "Ελληνικά" },
 ];
 
-type LangCtx = { lang: string; setLang: (c: string) => void; translate: (key: string, fallback?: string) => string };
-const Ctx = createContext<LangCtx>({ lang: "en", setLang: () => {}, translate: (k) => k });
+type LangCtx = { lang: string; setLang: (c: string) => void; translate: TFunction; };
+const Ctx = createContext<LangCtx>({} as LangCtx);
 
 export function LanguageProvider({ children }: { children: ReactNode }) {
-  const [lang, setLangState] = useState<string>(() => localStorage.getItem("gyd_lang") || "en");
-  useEffect(() => { localStorage.setItem("gyd_lang", lang); }, [lang]);
+  const { i18n, t } = useTranslation();
 
-  const setLang = useCallback((c: string) => { setLangState(c); }, []);
+  const setLang = useCallback((code: string) => {
+    i18n.changeLanguage(code);
+  }, [i18n]);
 
-  const translate = useCallback((key: string, fallback?: string): string => {
-    return t(key, lang) ?? fallback ?? key;
-  }, [lang]);
+  const translate = useCallback((key: string, fallback?: string) => {
+    return t(key, { defaultValue: fallback });
+  }, [t]);
 
-  return <Ctx.Provider value={{ lang, setLang, translate }}>{children}</Ctx.Provider>;
+  return <Ctx.Provider value={{ lang: i18n.language, setLang, translate }}>{children}</Ctx.Provider>;
 }
 
 export const useLanguage = () => useContext(Ctx);

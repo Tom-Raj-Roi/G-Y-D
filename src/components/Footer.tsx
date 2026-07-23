@@ -104,11 +104,11 @@ export default function Footer() {
               <Mail className="h-4 w-4 mt-0.5 shrink-0" />
               <div className="space-y-1">
                 <div>
-                  <EditableText id="footer.email" fallback="info@getyourdreams.com" />
+                  <EditableText id="footer.email" fallback="info@getyourdreams.xyz" />
                   <span className="block text-[10px] text-primary-foreground/60">{translate("footer.general_inquiries_only", "For general inquiries only")}</span>
                 </div>
                 <div>
-                  <EditableText id="footer.email_hr" fallback="hr@getyourdreams.com" className="font-semibold text-accent" />
+                  <EditableText id="footer.email_hr" fallback="hr@getyourdreams.xyz" className="font-semibold text-accent" />
                   <span className="block text-[10px] text-primary-foreground/60">{translate("footer.send_cv_here", "Send CV, cover letter & supporting documents here")}</span>
                 </div>
               </div>

@@ -50,13 +50,16 @@ export default function Contact() {
             <Mail className="h-5 w-5 text-primary shrink-0 mt-0.5" />
             <div>
               <p><strong>{translate("contact.general_inquiries", "General inquiries:")}</strong>{" "}
-                <a href="mailto:info@getyourdreams.com" className="text-primary underline">info@getyourdreams.com</a>
+                <a href="mailto:info@getyourdreams.xyz" className="text-primary underline">info@getyourdreams.xyz</a>
               </p>
               <p><strong>{translate("contact.cv_and_docs", "CV, cover letter & supporting documents:")}</strong>{" "}
-                <a href="mailto:hr@getyourdreams.com" className="text-primary font-semibold underline">hr@getyourdreams.com</a>
+                <a href="mailto:hr@getyourdreams.xyz" className="text-primary font-semibold underline">hr@getyourdreams.xyz</a>
+              </p>
+              <p><strong>{translate("contact.admin_contact", "Admin Contact:")}</strong>{" "}
+                <a href="mailto:admin@getyourdreams.xyz" className="text-primary underline">admin@getyourdreams.xyz</a> <span className="text-xs text-muted-foreground">({translate("contact.emergency_only", "contact only for emergency")})</span>
               </p>
               <p className="text-muted-foreground mt-1">
-                {translate("contact.important_note", "Please use the info mailbox only for inquiries. All applications and documents must be sent to hr@getyourdreams.com.")}
+                {translate("contact.important_note", "Please use the info mailbox only for inquiries. All applications and documents must be sent to hr@getyourdreams.xyz.")}
               </p>
             </div>
           </div>

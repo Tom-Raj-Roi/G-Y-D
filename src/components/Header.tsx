@@ -51,9 +51,9 @@ export default function Header() {
         <div className="flex-1 hidden md:flex flex-col items-center text-xs lg:text-sm text-muted-foreground">
           <div className="flex items-center gap-1 lg:gap-3 flex-wrap justify-center">
             <Phone className="h-3.5 w-3.5 text-primary" />
-            <EditableText id="header.phone1" fallback="+966 55 239 0860" className="hover:text-primary transition-smooth" />
+            <EditableText id="header.phone1" fallback="+966 552390860" className="hover:text-primary transition-smooth" />
             <span className="text-border">|</span>
-            <EditableText id="header.phone2" fallback="+91 6374 504 413" className="hover:text-primary transition-smooth" />
+            <EditableText id="header.phone2" fallback="+91 6374504413" className="hover:text-primary transition-smooth" />
             <span className="text-border">|</span>
             <EditableText id="header.phone3" fallback="+91 9597589990" className="hover:text-primary transition-smooth" />
           </div>
@@ -67,6 +67,11 @@ export default function Header() {
               <Mail className="h-3.5 w-3.5 text-accent" />
               <EditableText id="header.email_hr" fallback="hr@getyourdreams.xyz" className="hover:text-primary transition-smooth font-medium" />
               <span className="text-[10px] text-muted-foreground">{translate("header.send_cv_here", "(send CV here)")}</span>
+            </span>
+            <span className="flex items-center gap-1">
+              <Mail className="h-3.5 w-3.5 text-accent" />
+              <EditableText id="header.email_hr" fallback="admin@getyourdreams.xyz" className="hover:text-primary transition-smooth font-medium" />
+              <span className="text-[10px] text-muted-foreground">{translate("header. (contact only for emergency)", "(contact only for emergency)")}</span>
             </span>
           </div>
         </div>

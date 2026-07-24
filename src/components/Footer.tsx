@@ -9,14 +9,14 @@ import EditableImage from "./EditableImage";
 import logoFallback from "@/assets/company-logo.jpg";
 
 const SOCIALS: { id: string; label: string; fallback: string; Icon: React.ComponentType<{ className?: string }> }[] = [
-  { id: "footer.social.whatsapp_channel", label: "socials.whatsapp_channel", fallback: "https://whatsapp.com/channel/0029VbEKWwnDp2QC77ngL60O", Icon: MessageCircle },
-  { id: "footer.social.whatsapp_group", label: "socials.whatsapp_group", fallback: "https://chat.whatsapp.com/KPggZqVk9Gc63a8NboQzYa", Icon: Users },
-  { id: "footer.social.telegram", label: "socials.telegram", fallback: "https://t.me/+40JIyl-SLqRiYzdl", Icon: Send },
-  { id: "footer.social.instagram", label: "socials.instagram", fallback: "Coming Soon", Icon: Instagram },
-  { id: "footer.social.tiktok", label: "socials.tiktok", fallback: "https://www.tiktok.com/@getyourdreams.com?_r=1&_t=ZS-96BztL2vBvZ", Icon: Music2 },
-  { id: "footer.social.facebook", label: "socials.facebook", fallback: "Coming Soon", Icon: Facebook },
-  { id: "footer.social.twitter", label: "socials.twitter", fallback: "Coming soon", Icon: Twitter },
-  { id: "footer.social.linkedin", label: "socials.linkedin", fallback: "Coming Soon", Icon: Linkedin },
+  { id: "footer.social.whatsapp_channel", label: "Whatsapp Channel", fallback: "https://whatsapp.com/channel/0029VbEKWwnDp2QC77ngL60O", Icon: MessageCircle },
+  { id: "footer.social.whatsapp_group", label: "Whatsapp Group", fallback: "https://chat.whatsapp.com/KPggZqVk9Gc63a8NboQzYa", Icon: Users },
+  { id: "footer.social.telegram", label: "Telegram", fallback: "https://t.me/+40JIyl-SLqRiYzdl", Icon: Send },
+  { id: "footer.social.instagram", label: "Instagram", fallback: "Coming Soon", Icon: Instagram },
+  { id: "footer.social.tiktok", label: "Tiktok", fallback: "https://www.tiktok.com/@getyourdreams.com?_r=1&_t=ZS-96BztL2vBvZ", Icon: Music2 },
+  { id: "footer.social.facebook", label: "Facebook", fallback: "Coming Soon", Icon: Facebook },
+  { id: "footer.social.twitter", label: "Twitter", fallback: "Coming soon", Icon: Twitter },
+  { id: "footer.social.linkedin", label: "Linkedin", fallback: "Coming Soon", Icon: Linkedin },
 ];
 
 export default function Footer() {
@@ -58,7 +58,7 @@ export default function Footer() {
           <EditableText id="footer.tagline" fallback="Connecting talent with opportunity worldwide. Your dream career starts here."
             as="p" className="text-sm text-primary-foreground/80" multiline />
           <div className="mt-4 space-y-2">
-            <h5 className="text-xs uppercase tracking-wider text-accent font-semibold">{translate("footer.connect")}</h5>
+            <h5 className="text-xs uppercase tracking-wider text-accent font-semibold">{translate("connect", "Connect")}</h5>
             <div className="grid grid-cols-1 gap-1.5">
               {SOCIALS.map(({ id, label, fallback, Icon }) => {
                 const url = getContent(id, fallback);
@@ -79,7 +79,7 @@ export default function Footer() {
         </div>
 
         <div>
-          <h4 className="font-display font-bold mb-4 text-accent">{translate("footer.quick_links")}</h4>
+          <h4 className="font-display font-bold mb-4 text-accent">{translate("quick_links", "Quick links")}</h4>
           <ul className="space-y-2 text-sm">
             {footerNav.map((n) => (
               <li key={n.to}>
@@ -90,7 +90,7 @@ export default function Footer() {
         </div>
 
         <div>
-          <h4 className="font-display font-bold mb-4 text-accent">{translate("footer.contact")}</h4>
+          <h4 className="font-display font-bold mb-4 text-accent">{translate("contact", "Contact")}</h4>
           <ul className="space-y-2 text-sm text-primary-foreground/80">
             <li className="flex items-start gap-2">
               <Phone className="h-4 w-4 mt-0.5 shrink-0" />
@@ -111,6 +111,10 @@ export default function Footer() {
                   <EditableText id="footer.email_hr" fallback="hr@getyourdreams.xyz" className="font-semibold text-accent" />
                   <span className="block text-[10px] text-primary-foreground/60">{translate("footer.send_cv_here", "Send CV, cover letter & supporting documents here")}</span>
                 </div>
+                <div>
+                  <EditableText id="footer.email" fallback="admin@getyourdreams.xyz" />
+                  <span className="block text-[10px] text-primary-foreground/60">{translate("footer.general_inquiries_only", " (contact only for emergency)")}</span>
+                </div>
               </div>
             </li>
             <li className="flex items-start gap-2">
@@ -129,21 +133,21 @@ export default function Footer() {
         </div>
 
         <div>
-          <h4 className="font-display font-bold mb-4 text-accent">{translate("footer.legal")}</h4>
+          <h4 className="font-display font-bold mb-4 text-accent">{translate("legal", "Legal")}</h4>
           <ul className="space-y-2 text-sm">
             <li>
               <Link to="/terms" onClick={() => handleNavClick("/terms")} className="block text-left w-full hover:text-accent transition-smooth">
-                {translate("footer.terms")}
+                {translate("terms_conditions", "Terms & Conditions")}
               </Link>
             </li>
             <li>
               <Link to="/privacy" onClick={() => handleNavClick("/privacy")} className="block text-left w-full hover:text-accent transition-smooth">
-                {translate("footer.privacy")}
+                {translate("privacy_policy", "Privacy Policy")}
               </Link>
             </li>
             <li>
               <Link to="/contact" onClick={() => handleNavClick("/contact")} className="hover:text-accent transition-smooth">
-                {translate("footer.support")}
+                {translate("support")}
               </Link>
             </li>
           </ul>

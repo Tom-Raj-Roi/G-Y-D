@@ -50,8 +50,8 @@ export default function JobReferrer() {
           <div>
             <strong>Important:</strong> For any inquiries please email{" "}
             <a href="mailto:info@getyourdreams.xyz" className="text-primary underline">info@getyourdreams.xyz</a>.
-            Send job details, offer letters and supporting documents to{" "}
-            <a href="mailto:hr@getyourdreams.xyz" className="text-primary font-semibold underline">hr@getyourdreams.xyz</a> or <a href="mailto:admin@getyourdreams.xyz" className="text-primary font-semibold underline">admin@getyourdreams.xyz</a> <span className="text-xs text-muted-foreground">(for emergency use)</span>.
+            Send job details, offer letters and supporting documents to{" "} <a href="mailto:admin@getyourdreams.xyz" className="text-primary font-semibold underline">admin@getyourdreams.xyz</a> or
+            <a href="mailto:hr@getyourdreams.xyz" className="text-primary font-semibold underline">hr@getyourdreams.xyz</a>.
           </div>
         </div>
 

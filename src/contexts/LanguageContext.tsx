@@ -1,6 +1,5 @@
 import { createContext, useContext, ReactNode, useCallback } from "react";
 import { useTranslation } from "react-i18next";
-import { TFunction } from "i18next";
 
 export const LANGUAGES = [
   { code: "en", name: "English" },
@@ -35,7 +34,13 @@ export const LANGUAGES = [
   { code: "el", name: "Ελληνικά" },
 ];
 
-type LangCtx = { lang: string; setLang: (c: string) => void; translate: TFunction; };
+// Changed TFunction to a clean, custom function signature to match what you return
+type LangCtx = { 
+  lang: string; 
+  setLang: (c: string) => void; 
+  translate: (key: string, fallback?: string) => string; 
+};
+
 const Ctx = createContext<LangCtx>({} as LangCtx);
 
 export function LanguageProvider({ children }: { children: ReactNode }) {

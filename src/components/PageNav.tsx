@@ -2,13 +2,13 @@ import { Link } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
 
 export const PAGE_NAV_LINKS = [
-  { to: "/", key: "nav.home" },
-  { to: "/our-services", key: "nav.our_services" },
-  { to: "/job-seekers", key: "nav.job_seekers" },
-  { to: "/job-referrer", key: "nav.job_referrer" },
-  { to: "/current-vacancy", key: "nav.current_vacancy" },
-  { to: "/agency", key: "nav.agency" },
-  { to: "/contact", key: "nav.contact" },
+  { to: "/", key: "home", fallback: "Home" },
+  { to: "/our-services", key: "Our Services", fallback: "Our Services" },
+  { to: "/job-seekers", key: "Job Seekers", fallback: "Job Seekers" },
+  { to: "/job-referrer", key: "Job Jeferrer", fallback: "Job Referrer" },
+  { to: "/current-vacancy", key: "Current Vacancy", fallback: "Current Vacancy" },
+  { to: "/agency", key: "agency", fallback: "Agency" },
+  { to: "/contact", key: "contact", fallback: "Contact" },
 ];
 
 export default function PageNav() {
@@ -18,7 +18,7 @@ export default function PageNav() {
     {PAGE_NAV_LINKS.map((n) => (
       <Link key={n.to} to={n.to}
         className="px-4 py-2 rounded-full bg-muted hover:bg-primary hover:text-primary-foreground text-sm font-medium transition-smooth">
-        {translate(n.key)}
+        {translate(n.key, n.fallback)}
       </Link>
     ))}
   </nav>;

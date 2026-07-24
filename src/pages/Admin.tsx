@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { Navigate } from "react-router-dom";
 import Layout from "@/components/Layout";
 import { useAuth } from "@/contexts/AuthContext";
@@ -33,25 +33,24 @@ function SubmissionsTable({ table, columns, fileFields = [] }: { table: string; 
   const [rows, setRows] = useState<Record<string, unknown>[]>([]);
   const [loading, setLoading] = useState(true);
   const { t } = useTranslation();
-
-  const load = async () => {
+  const load = useCallback(async () => {
     setLoading(true);
     // @ts-expect-error dynamic table
     const { data, error } = await supabase.from(table).select("*").order("created_at", { ascending: false });
     if (error) toast.error(error.message);
     setRows((data as Record<string, unknown>[]) || []);
     setLoading(false);
-  };
-  useEffect(() => { load(); }, []);
+  }, [table]);
+  useEffect(() => { load(); }, [load]);
 
-  const remove = async (id: string) => {
+  const remove = useCallback(async (id: string) => {
     if (!confirm(t("admin.confirm_delete_submission", "Delete this submission?"))) return;
     // @ts-expect-error dynamic table
     const { error } = await supabase.from(table).delete().eq("id", id);
     if (error) return toast.error(error.message);
     toast.success(t("admin.toast.deleted", "Deleted"));
     load();
-  };
+  }, [t, table, load]);
 
   if (loading) return <Loader2 className="h-5 w-5 animate-spin" />;
   if (rows.length === 0) return <p className="text-muted-foreground py-8 text-center">{t("admin.no_submissions", "No submissions yet.")}</p>;
@@ -89,11 +88,11 @@ function VacancyManager() {
   const [editing, setEditing] = useState<string | null>(null);
   const { t } = useTranslation();
 
-  const load = async () => {
+  const load = useCallback(async () => {
     const { data } = await supabase.from("vacancies").select("*").order("created_at", { ascending: false });
     setVacancies(data || []);
-  };
-  useEffect(() => { load(); }, []);
+  }, []);
+  useEffect(() => { load(); }, [load]);
 
   const save = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -111,11 +110,11 @@ function VacancyManager() {
     load();
   };
 
-  const remove = async (id: string) => {
+  const remove = useCallback(async (id: string) => {
     if (!confirm(t("admin.confirm_delete", "Delete?"))) return;
     await supabase.from("vacancies").delete().eq("id", id);
     load();
-  };
+  }, [t, load]);
 
   return (
     <div className="space-y-6">
@@ -175,11 +174,11 @@ function CustomPagesManager() {
   const [editing, setEditing] = useState<string | null>(null);
   const { t } = useTranslation();
 
-  const load = async () => {
+  const load = useCallback(async () => {
     const { data } = await supabase.from("custom_pages").select("*").order("position");
     setPages(data || []);
-  };
-  useEffect(() => { load(); }, []);
+  }, []);
+  useEffect(() => { load(); }, [load]);
 
   const reset = () => setForm({
     slug: "", title: "", content: "", show_in_nav: true, show_in_footer: true, position: 0,
@@ -201,12 +200,12 @@ function CustomPagesManager() {
     load();
   };
 
-  const remove = async (id: string) => {
+  const remove = useCallback(async (id: string) => {
     if (!confirm(t("admin.pages.confirm_delete", "Delete this page?"))) return;
     const { error } = await supabase.from("custom_pages").delete().eq("id", id);
     if (error) return toast.error(error.message);
     load();
-  };
+  }, [t, load]);
 
   return (
     <div className="space-y-6">
@@ -265,10 +264,11 @@ function CustomPagesManager() {
         <Button type="submit" className="md:col-span-2 bg-primary-gradient">
           <Plus className="h-4 w-4 mr-1" />{editing ? t("admin.pages.update_button", "Update Page") : t("admin.pages.create_button", "Create Page")}
         </Button>
-        {editing && <Button type="button" variant="outline" className="md:col-span-2"
-          onClick={() => { setEditing(null); reset(); }}>
-          {t("admin.pages.cancel_edit_button", "Cancel edit")}
-        </Button>}
+        {editing && (
+          <Button type="button" variant="outline" className="md:col-span-2" onClick={() => { setEditing(null); reset(); }}>
+            {t("admin.pages.cancel_edit_button", "Cancel edit")}
+          </Button>
+        )}
       </form>
 
       <div className="space-y-2">
@@ -313,12 +313,12 @@ function HomeContentManager() {
   const [saving, setSaving] = useState<string | null>(null);
   const { t } = useTranslation();
 
-  const load = async () => {
+  const load = useCallback(async () => {
     const { data, error } = await supabase.from("site_sections").select("*").order("position");
     if (error) toast.error(error.message);
     setSections(data || []);
-  };
-  useEffect(() => { load(); }, []);
+  }, []);
+  useEffect(() => { load(); }, [load]);
 
   const update = (id: string, patch: Partial<HomeSection>) =>
     setSections((items) => items.map((section) => section.id === id ? { ...section, ...patch } : section));
@@ -360,14 +360,14 @@ function NotificationsManager() {
   const [items, setItems] = useState<AdminNotification[]>([]);
   const [loading, setLoading] = useState(true);
   const { t } = useTranslation();
-  const load = async () => {
+  const load = useCallback(async () => {
     setLoading(true);
     const { data, error } = await supabase.from("admin_notifications").select("*").order("created_at", { ascending: false });
     if (error) toast.error(error.message);
     setItems(data || []);
     setLoading(false);
-  };
-  useEffect(() => { load(); }, []);
+  }, []);
+  useEffect(() => { load(); }, [load]);
   const markAllRead = async () => {
     const { error } = await supabase.from("admin_notifications").update({ read_at: new Date().toISOString() }).is("read_at", null);
     if (error) return toast.error(error.message);

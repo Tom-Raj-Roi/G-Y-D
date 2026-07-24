@@ -25,6 +25,7 @@ const queryClient = new QueryClient();
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <BrowserRouter>
+      <div id="recaptcha-container-gyd" style={{ display: "none" }} />
       <LanguageProvider>
         <AuthProvider>
           <EditorProvider>

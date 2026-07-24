@@ -66,13 +66,15 @@ export default function Header() {
         </div>
 
         <div className="flex items-center gap-2 ml-auto">
-          <GoogleTranslate />
           <DropdownMenu>
             <DropdownMenuTrigger className="flex items-center gap-1 px-3 py-2 rounded-lg hover:bg-muted transition-smooth text-sm">
               <Globe className="h-4 w-4" />
               <span className="hidden sm:inline">{LANGUAGES.find((l) => l.code === lang)?.name ?? "English"}</span>
             </DropdownMenuTrigger>
             <DropdownMenuContent className="max-h-80 overflow-y-auto bg-popover">
+              <DropdownMenuItem header>Translate Page</DropdownMenuItem>
+              <GoogleTranslate />
+              <DropdownMenuSeparator />
               {LANGUAGES.map((l) => (
                 <DropdownMenuItem key={l.code} onClick={() => setLang(l.code)}
                   className={l.code === lang ? "bg-accent/20 font-semibold" : ""}>

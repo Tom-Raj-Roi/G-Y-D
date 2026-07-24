@@ -11,6 +11,7 @@ import { toast } from "sonner";
 import { Loader2, ShieldCheck, Mail } from "lucide-react";
 import PhoneInput from "@/components/PhoneInput";
 import CurrencyInput from "@/components/CurrencyInput";
+import PhoneOTPAuth from "@/components/PhoneOTPAuth";
 import PageNav from "@/components/PageNav";
 
 export default function JobReferrer() {
@@ -19,18 +20,25 @@ export default function JobReferrer() {
     salary: "", salary_currency: "INR", location: "", job_expiry_date: "", job_type: "full_time", responsibilities: "",
   });
   const [submitting, setSubmitting] = useState(false);
+  const [phoneVerified, setPhoneVerified] = useState(false);
+  const formattedPhone = form.contact_number.replace(/\s+/g, "");
 
   const set = (k: keyof typeof form) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
     setForm((f) => ({ ...f, [k]: e.target.value }));
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!phoneVerified) {
+      toast.error("Please verify your phone number with OTP before submitting.");
+      return;
+    }
     setSubmitting(true);
     const { error } = await supabase.from("job_referrers").insert({
       ...form,
       job_expiry_date: form.job_expiry_date || null,
       job_type: form.job_type as "full_time" | "part_time" | "freelancer" | "other",
-      phone_verified: true, email_verified: true,
+      phone_verified: phoneVerified,
+      email_verified: false,
     });
     setSubmitting(false);
     if (error) { toast.error(error.message); return; }
@@ -64,6 +72,14 @@ export default function JobReferrer() {
             <Label>Contact Number *</Label>
             <PhoneInput required value={form.contact_number} onChange={(v) => setForm((f) => ({ ...f, contact_number: v }))} />
           </div>
+          {form.contact_number && formattedPhone.startsWith("+") && (
+            <div className="p-4 border rounded-lg bg-muted/20">
+              <p className="text-sm text-muted-foreground mb-2">
+                Verify your phone number via SMS to ensure we can reach you.
+              </p>
+              <PhoneOTPAuth phoneNumber={formattedPhone} onVerified={setPhoneVerified} />
+            </div>
+          )}
           <div>
             <Label>Email *</Label>
             <Input required type="email" value={form.email} onChange={set("email")} />
@@ -91,7 +107,7 @@ export default function JobReferrer() {
             </Select>
           </div>
           <div><Label>Responsibilities</Label><Textarea rows={5} value={form.responsibilities} onChange={set("responsibilities")} /></div>
-          <Button type="submit" disabled={submitting} className="w-full bg-primary-gradient" size="lg">
+          <Button type="submit" disabled={submitting || !phoneVerified} className="w-full bg-primary-gradient" size="lg">
             {submitting && <Loader2 className="h-4 w-4 mr-2 animate-spin" />} Submit Privately
           </Button>
         </form>

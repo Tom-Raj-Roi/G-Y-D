@@ -11,6 +11,7 @@ import { toast } from "sonner";
 import { Loader2, Mail } from "lucide-react";
 import PhoneInput from "@/components/PhoneInput";
 import CurrencyInput from "@/components/CurrencyInput";
+import PhoneOTPAuth from "@/components/PhoneOTPAuth";
 import PageNav from "@/components/PageNav";
 import { useLanguage } from "@/contexts/LanguageContext";
 
@@ -23,12 +24,18 @@ export default function JobSeekers() {
   });
   const [files, setFiles] = useState<{ cv?: File; cover?: File; passport?: File; cert?: File }>({});
   const [submitting, setSubmitting] = useState(false);
+  const [phoneVerified, setPhoneVerified] = useState(false);
+  const formattedPhone = form.contact_number.replace(/\s+/g, "");
 
   const set = (k: keyof typeof form) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
     setForm((f) => ({ ...f, [k]: e.target.value }));
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!phoneVerified) {
+      toast.error(translate("contact.toast.phone_not_verified", "Please verify your phone number with OTP before submitting."));
+      return;
+    }
     if (!files.cv) { toast.error(translate("job_seekers.toast.cv_required", "CV is required.")); return; }
     setSubmitting(true);
     const cv_url = await uploadApplicationFile(files.cv, "seekers/cv");
@@ -37,14 +44,15 @@ export default function JobSeekers() {
     const certificates_url = files.cert ? await uploadApplicationFile(files.cert, "seekers/cert") : null;
 
     const { error } = await supabase.from("job_seekers").insert({
-      ...form, cv_url, cover_letter_url, passport_url, certificates_url,
-      phone_verified: true, email_verified: true,
+      ...form, cv_url, cover_letter_url, passport_url, certificates_url, phone_verified: phoneVerified,
+      email_verified: false,
     });
     setSubmitting(false);
     if (error) { toast.error(error.message); return; }
     toast.success(translate("job_seekers.toast.success", "Your application has been submitted! Our team will reach out shortly."));
     setForm({ name: "", contact_number: "", email: "", designation: "", expected_salary: "", salary_currency: "INR", experience: "", expected_country: "", current_position: "", native_country: "" });
     setFiles({});
+    setPhoneVerified(false);
   };
 
   return (
@@ -73,6 +81,14 @@ export default function JobSeekers() {
             <Label>{translate("form.contact_number", "Contact Number")} *</Label>
             <PhoneInput required value={form.contact_number} onChange={(v) => setForm((f) => ({ ...f, contact_number: v }))} />
           </div>
+          {form.contact_number && formattedPhone.startsWith("+") && (
+            <div className="p-4 border rounded-lg bg-muted/20">
+              <p className="text-sm text-muted-foreground mb-2">
+                {translate("contact.phone_verification", "Verify your phone number via SMS to ensure we can reach you.")}
+              </p>
+              <PhoneOTPAuth phoneNumber={formattedPhone} onVerified={setPhoneVerified} />
+            </div>
+          )}
           <div>
             <Label>{translate("form.email", "Email")} *</Label>
             <Input required type="email" value={form.email} onChange={set("email")} />
@@ -114,7 +130,7 @@ export default function JobSeekers() {
             <div><Label>{translate("form.degree_certificates", "Degree Certificates (optional)")}</Label><Input type="file" accept="image/*" onChange={(e) => setFiles({ ...files, cert: e.target.files?.[0] })} /></div>
           </div>
 
-          <Button type="submit" disabled={submitting} className="w-full bg-primary-gradient" size="lg">
+          <Button type="submit" disabled={submitting || !phoneVerified} className="w-full bg-primary-gradient" size="lg">
             {submitting && <Loader2 className="h-4 w-4 mr-2 animate-spin" />} {translate("form.submit_application", "Submit Application")}
           </Button>
         </form>

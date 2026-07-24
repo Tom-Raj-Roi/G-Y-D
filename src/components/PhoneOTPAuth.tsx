@@ -35,19 +35,24 @@ export default function PhoneOTPAuth({ phoneNumber, onVerified, defaultVerified 
     setOtp("");
     setErrorMsg("");
     confirmationResultRef.current = null;
-    if (recaptchaRef.current) {
-      recaptchaRef.current.clear();
-      recaptchaRef.current = null;
-    }
   }, [phoneNumber]);
 
   useEffect(() => {
+    if (!firebaseAuth) {
+      setErrorMsg("Firebase is not configured. Phone verification is disabled.");
+      setStep("error");
+      return;
+    }
+    const verifier = new RecaptchaVerifier(firebaseAuth, "recaptcha-container-gyd", {
+      size: "invisible",
+    });
+    recaptchaRef.current = verifier;
+
+    // The div is created by RecaptchaVerifier, we just need to ensure it's cleaned up.
     return () => {
-      if (recaptchaRef.current) {
-        recaptchaRef.current.clear();
-      }
+      verifier.clear();
     };
-  }, []);
+  }, [firebaseAuth]);
 
   const sendOTP = async () => {
     if (!phoneNumber || !phoneNumber.startsWith("+")) {
@@ -55,25 +60,17 @@ export default function PhoneOTPAuth({ phoneNumber, onVerified, defaultVerified 
       setStep("error");
       return;
     }
+    if (!firebaseAuth) {
+      setErrorMsg("Firebase is not configured. Phone verification is disabled.");
+      setStep("error");
+      return;
+    }
     setStep("sending");
     setErrorMsg("");
+
     try {
-      const containerId = `recaptcha-container-${Math.random().toString(36).slice(2, 11)}`;
-      const div = document.createElement("div");
-      div.id = containerId;
-      div.style.display = "none";
-      document.body.appendChild(div);
-
-      recaptchaRef.current = new RecaptchaVerifier(firebaseAuth, containerId, {
-        size: "invisible",
-        callback: () => {},
-        'expired-callback': () => {
-          setErrorMsg(translate("otp.error_recaptcha_expired", "reCAPTCHA expired. Please try again."));
-          setStep("error");
-        },
-      });
-
-      const confirmationResult = await signInWithPhoneNumber(firebaseAuth, phoneNumber, recaptchaRef.current);
+      if (!recaptchaRef.current) throw new Error("Recaptcha verifier not initialized.");
+      const confirmationResult = await signInWithPhoneNumber(firebaseAuth, phoneNumber, recaptchaRef.current!);
       confirmationResultRef.current = confirmationResult;
       setStep("sent");
     } catch (err: any) {
@@ -102,7 +99,10 @@ export default function PhoneOTPAuth({ phoneNumber, onVerified, defaultVerified 
         setIsVerified(true);
         setStep("verified");
         onVerified(true);
-        await firebaseAuth.signOut();
+        // If the purpose of this component is solely phone verification for a form,
+        // signing out immediately might cause unnecessary re-renders of the entire app.
+        // Only sign out if a persistent Firebase user session is NOT desired after verification.
+        // await firebaseAuth.signOut();
       }
     } catch (err: any) {
       console.error("OTP verify error:", err);

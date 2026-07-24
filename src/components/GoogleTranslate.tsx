@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef } from "react";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { Globe, X } from "lucide-react";
+import { X } from "lucide-react";
 
 const GOOGLE_TRANSLATE_SCRIPT_ID = "google-translate-script";
 
@@ -109,25 +109,7 @@ export default function GoogleTranslate() {
   return (
     <>
       <div id="google_translate_element" className="hidden" aria-hidden="true" />
-
-      <div className="flex items-center gap-2">
-        <button
-          type="button"
-          onClick={() => {
-            const el = document.getElementById("google_translate_element");
-            if (el) {
-              el.classList.remove("hidden");
-              const iframe = el.querySelector("iframe");
-              if (iframe) iframe.style.display = "block";
-            }
-          }}
-          className="flex items-center gap-1 px-3 py-2 rounded-lg hover:bg-muted transition-smooth text-sm"
-          aria-label="Translate"
-        >
-          <Globe className="h-4 w-4" />
-          <span className="hidden sm:inline">{lang === "en" ? "Translate" : "🌐"}</span>
-        </button>
-      </div>
+      {/* This component now only manages the logic and the popup. The button is in the Header. */}
 
       {showPopup && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm">

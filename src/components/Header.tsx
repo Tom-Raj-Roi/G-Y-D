@@ -2,6 +2,7 @@ import { Link, NavLink } from "react-router-dom";
 import { Mail, Phone, MoreVertical, Globe, LogOut, Settings, Pencil } from "lucide-react";
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator,
+  DropdownMenuLabel,
 } from "@/components/ui/dropdown-menu";
 import EditableText from "./EditableText";
 import EditableImage from "./EditableImage";
@@ -72,7 +73,7 @@ export default function Header() {
               <span className="hidden sm:inline">{LANGUAGES.find((l) => l.code === lang)?.name ?? "English"}</span>
             </DropdownMenuTrigger>
             <DropdownMenuContent className="max-h-80 overflow-y-auto bg-popover">
-              <DropdownMenuItem header>Translate Page</DropdownMenuItem>
+              <DropdownMenuLabel>Translate Page</DropdownMenuLabel>
               <GoogleTranslate />
               <DropdownMenuSeparator />
               {LANGUAGES.map((l) => (

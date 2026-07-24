@@ -16,7 +16,7 @@ let firebaseAuth: Auth | null = null;
 if (firebaseConfig.apiKey) {
   app = !getApps().length ? initializeApp(firebaseConfig) : getApps()[0];
   firebaseAuth = getAuth(app);
-} else {
+} else { 
   if (import.meta.env.DEV) {
     console.warn(
       "Firebase credentials are not set in your .env file. " +

@@ -2,13 +2,13 @@ import { Link } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
 
 export const PAGE_NAV_LINKS = [
-  { to: "/", key: "home", fallback: "Home" },
+  { to: "/", key: "Home", fallback: "Home" },
   { to: "/our-services", key: "Our Services", fallback: "Our Services" },
   { to: "/job-seekers", key: "Job Seekers", fallback: "Job Seekers" },
-  { to: "/job-referrer", key: "Job Jeferrer", fallback: "Job Referrer" },
+  { to: "/job-referrer", key: "Job Referrer", fallback: "Job Referrer" },
   { to: "/current-vacancy", key: "Current Vacancy", fallback: "Current Vacancy" },
-  { to: "/agency", key: "agency", fallback: "Agency" },
-  { to: "/contact", key: "contact", fallback: "Contact" },
+  { to: "/agency", key: "Agency", fallback: "Agency" },
+  { to: "/contact", key: "Contact", fallback: "Contact" },
 ];
 
 export default function PageNav() {

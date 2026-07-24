@@ -34,7 +34,7 @@ export default function PhoneOTPAuth({ phoneNumber, onVerified, defaultVerified 
     setStep("idle");
     setOtp("");
     setErrorMsg("");
-    confirmationResultRef.current = null;
+    confirmationResultRef.current = null; 
   }, [phoneNumber]);
 
   useEffect(() => {

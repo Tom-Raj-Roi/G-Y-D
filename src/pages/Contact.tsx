@@ -68,7 +68,7 @@ export default function Contact() {
                 <a href="mailto:hr@getyourdreams.xyz" className="text-primary font-semibold underline">hr@getyourdreams.xyz</a>
               </p>
               <p><strong>{translate("contact.admin_contact", "Admin Contact:")}</strong>{" "}
-                <a href="mailto:admin@getyourdreams.xyz" className="text-primary underline">admin@getyourdreams.xyz</a> <span className="text-xs text-muted-foreground">({translate("contact.emergency_only", "contact only for emergency")})</span>
+                <a href="mailto:admin@getyourdreams.xyz" className="text-primary underline">admin@getyourdreams.xyz</a> <span className="text-xs text-muted-foreground">({translate("header.emergency_contact_note", "contact only for emergency")})</span>
               </p>
               <p className="text-muted-foreground mt-1">
                 {translate("contact.important_note", "Please use the info mailbox only for inquiries. All applications and documents must be sent to hr@getyourdreams.xyz.")}

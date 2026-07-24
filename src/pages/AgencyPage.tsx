@@ -100,7 +100,7 @@ export default function Agency() {
           </div>
           <div><Label>Responsibilities</Label><Textarea rows={4} value={form.responsibilities} onChange={set("responsibilities")} /></div>
           <div><Label>Agency License (PDF) *</Label><Input required type="file" accept=".pdf,image/*" onChange={(e) => setLicenseFile(e.target.files?.[0])} /></div>
-          <Button type="submit" disabled={submitting || !phoneVerified} className="w-full bg-primary-gradient" size="lg">
+          <Button type="submit" disabled={submitting || !phoneVerified} className="w-full bg-primary-gradient" size="lg"> 
             {submitting && <Loader2 className="h-4 w-4 mr-2 animate-spin" />} Submit Agency Registration
           </Button>
         </form>

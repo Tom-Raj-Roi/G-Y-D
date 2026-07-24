@@ -21,10 +21,22 @@ To receive actual email as well, deploy `send-admin-notification` and configure 
 
 The email provider credentials must stay in Supabase secrets. Do not place them in `.env` variables exposed to Vite or in browser code.
 
-## OTP removal
+## Phone OTP verification (Firebase)
 
-OTP was unused scaffolding. The migration drops the `otp_codes` table, the unused UI component has been removed, and `input-otp` has been removed from dependencies. The normal admin email/password sign-in remains.
+Phone number verification is now handled client-side via **Firebase Phone Authentication** (SMS OTP).
 
-## Language content
+- The Firebase config lives in `src/integrations/firebase/config.ts` and reads credentials from `.env` (`VITE_FIREBASE_*`).
+- The reusable component `src/components/PhoneOTPAuth.tsx` sends an SMS code via `signInWithPhoneNumber`, verifies it with `ConfirmationResult.confirm()`, and reports success back to the parent via `onVerified(true)`.
+- The **Contact** form (`src/pages/Contact.tsx`) integrates `PhoneOTPAuth` after the phone field. The submit button is disabled until the phone is verified, and `phone_verified` is set to `true` only after successful OTP confirmation.
+- `email_verified` is set to `false` by default; email verification can be added separately.
+- **Prerequisites:** add your Firebase Web App credentials to `.env` and enable **Phone Authentication** in the Firebase Console → Authentication → Sign-in method.
 
-Navigation and the translation keys already in `src/lib/translations.ts` change with the language selector. Text saved through **Home content** is shared editorial content; it is not automatically machine-translated. To publish edited content in multiple languages accurately, use a translation workflow (human review is recommended) and store a version for each language before enabling it. Automatic browser-side translation is intentionally not used because it would expose inconsistent content and cannot reliably update the database.
+The old server-side `otp_codes` table was dropped by migration `20260715000000_admin_notifications_and_remove_otp.sql`.
+
+## Language / translation
+
+Navigation and the translation keys in `public/locales/en/translation.json` change with the language selector in the header. Text saved through **Home content** is shared editorial content; it is not automatically machine-translated.
+
+**Google Translate widget** (`src/components/GoogleTranslate.tsx`, rendered in the Header) provides on-demand machine translation for every word on the page — including numbers, form labels, and placeholders — via the Google Translate Element API. It also auto-detects the visitor's browser language and shows a one-time popup offering to translate the page. `autoDisplay: true` ensures all text nodes are translated.
+
+To publish edited content in multiple languages accurately, use a translation workflow (human review is recommended) and store a version for each language before enabling it.

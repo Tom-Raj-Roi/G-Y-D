@@ -8,6 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Loader2, Mail, Phone } from "lucide-react";
 import PhoneInput from "@/components/PhoneInput";
+import PhoneOTPAuth from "@/components/PhoneOTPAuth";
 import { useLanguage } from "@/contexts/LanguageContext";
 
 function generateCaptcha() {
@@ -22,6 +23,8 @@ export default function Contact() {
   const [captcha, setCaptcha] = useState(generateCaptcha());
   const [captchaInput, setCaptchaInput] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [phoneVerified, setPhoneVerified] = useState(false);
+  const formattedPhone = form.contact_number.replace(/\s+/g, "");
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -30,13 +33,22 @@ export default function Contact() {
       setCaptcha(generateCaptcha()); setCaptchaInput("");
       return;
     }
+    if (!phoneVerified) {
+      toast.error(translate("contact.toast.phone_not_verified", "Please verify your phone number with OTP before submitting."));
+      return;
+    }
     setSubmitting(true);
-    const { error } = await supabase.from("contacts").insert({ ...form, phone_verified: true, email_verified: true });
+    const { error } = await supabase.from("contacts").insert({
+      ...form,
+      phone_verified: phoneVerified,
+      email_verified: false,
+    });
     setSubmitting(false);
     if (error) { toast.error(error.message); return; }
     toast.success(translate("contact.toast.success", "Message sent! We'll be in touch soon."));
     setForm({ name: "", contact_number: "", email: "", subject: "", details: "" });
     setCaptcha(generateCaptcha()); setCaptchaInput("");
+    setPhoneVerified(false);
   };
 
   return (
@@ -77,6 +89,14 @@ export default function Contact() {
             <Label>{translate("form.phone", "Phone")} *</Label>
             <PhoneInput required value={form.contact_number} onChange={(v) => setForm({ ...form, contact_number: v })} />
           </div>
+          {form.contact_number && formattedPhone.startsWith("+") && (
+            <div className="p-4 border rounded-lg bg-muted/20">
+              <p className="text-sm text-muted-foreground mb-2">
+                {translate("contact.phone_verification", "Verify your phone number via SMS to ensure we can reach you.")}
+              </p>
+              <PhoneOTPAuth phoneNumber={formattedPhone} onVerified={setPhoneVerified} />
+            </div>
+          )}
           <div>
             <Label>{translate("form.email", "Email")} *</Label>
             <Input required type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} />
@@ -88,7 +108,7 @@ export default function Contact() {
             <Input value={captchaInput} onChange={(e) => setCaptchaInput(e.target.value)} className="w-24" placeholder={translate("form.captcha_answer", "Answer")} />
             <Button type="button" variant="ghost" size="sm" onClick={() => { setCaptcha(generateCaptcha()); setCaptchaInput(""); }}>{translate("form.captcha_refresh", "Refresh")}</Button>
           </div>
-          <Button type="submit" disabled={submitting} className="w-full bg-primary-gradient" size="lg">
+          <Button type="submit" disabled={submitting || !phoneVerified} className="w-full bg-primary-gradient" size="lg">
             {submitting && <Loader2 className="h-4 w-4 mr-2 animate-spin" />} {translate("form.send_message", "Send Message")}
           </Button>
         </form>

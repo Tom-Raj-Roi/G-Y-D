@@ -5,6 +5,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import EditableText from "./EditableText";
 import EditableImage from "./EditableImage";
+import GoogleTranslate from "./GoogleTranslate";
 import { useEditor } from "@/contexts/EditorContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { LANGUAGES, useLanguage } from "@/contexts/LanguageContext";
@@ -26,25 +27,13 @@ export default function Header() {
     <header className="sticky top-0 z-50 bg-background/95 backdrop-blur-md border-b shadow-card">
       <div className="container mx-auto px-4 py-3 flex items-center gap-4 flex-wrap lg:flex-nowrap">
         <Link to="/" className="flex items-center gap-3 shrink-0">
-          <EditableImage
-            id="header.logo"
-            fallback={logoFallback}
-            alt="GET YOUR DREAMS Logo"
-            className="h-16 w-16 lg:h-20 lg:w-20 object-contain rounded-lg"
-          />
+          <EditableImage id="header.logo" fallback={logoFallback} alt="GET YOUR DREAMS Logo"
+            className="h-16 w-16 lg:h-20 lg:w-20 object-contain rounded-lg" />
           <div className="flex flex-col leading-tight">
-            <EditableText
-              id="header.company_short"
-              fallback="GYD"
-              as="span"
-              className="font-display font-extrabold text-2xl lg:text-3xl text-gradient"
-            />
-            <EditableText
-              id="header.company_name"
-              fallback="GET YOUR DREAMS"
-              as="span"
-              className="font-display font-semibold text-xs lg:text-sm text-primary tracking-wide"
-            />
+            <EditableText id="header.company_short" fallback="GYD" as="span"
+              className="font-display font-extrabold text-2xl lg:text-3xl text-gradient" />
+            <EditableText id="header.company_name" fallback="GET YOUR DREAMS" as="span"
+              className="font-display font-semibold text-xs lg:text-sm text-primary tracking-wide" />
           </div>
         </Link>
 
@@ -77,6 +66,7 @@ export default function Header() {
         </div>
 
         <div className="flex items-center gap-2 ml-auto">
+          <GoogleTranslate />
           <DropdownMenu>
             <DropdownMenuTrigger className="flex items-center gap-1 px-3 py-2 rounded-lg hover:bg-muted transition-smooth text-sm">
               <Globe className="h-4 w-4" />
@@ -91,7 +81,6 @@ export default function Header() {
               ))}
             </DropdownMenuContent>
           </DropdownMenu>
-
           <DropdownMenu>
             <DropdownMenuTrigger className="p-2 rounded-lg hover:bg-muted transition-smooth">
               <MoreVertical className="h-5 w-5" />

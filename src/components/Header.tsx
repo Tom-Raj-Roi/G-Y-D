@@ -60,8 +60,8 @@ export default function Header() {
             </span>
             <span className="flex items-center gap-1">
               <Mail className="h-3.5 w-3.5 text-accent" />
-              <EditableText id="header.email_hr" fallback="admin@getyourdreams.xyz" className="hover:text-primary transition-smooth font-medium" />
-              <span className="text-[10px] text-muted-foreground">{translate("header. (contact only for emergency)", "(contact only for emergency)")}</span>
+              <EditableText id="header.email_admin" fallback="admin@getyourdreams.xyz" className="hover:text-primary transition-smooth font-medium" />
+              <span className="text-[10px] text-muted-foreground">{translate("header.emergency_contact_note", "(contact only for emergency)")}</span>
             </span>
           </div>
         </div>

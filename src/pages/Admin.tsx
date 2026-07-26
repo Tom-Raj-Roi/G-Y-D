@@ -89,8 +89,13 @@ function VacancyManager() {
   const { t } = useTranslation();
 
   const load = useCallback(async () => {
-    const { data } = await supabase.from("vacancies").select("*").order("created_at", { ascending: false });
-    setVacancies(data || []);
+    const { data, error } = await supabase.from("vacancies").select("*").order("created_at", { ascending: false });
+    if (error) {
+      toast.error(`Failed to load vacancies: ${error.message}`);
+      setVacancies([]);
+    } else {
+      setVacancies(data || []);
+    }
   }, []);
   useEffect(() => { load(); }, [load]);
 
@@ -175,8 +180,13 @@ function CustomPagesManager() {
   const { t } = useTranslation();
 
   const load = useCallback(async () => {
-    const { data } = await supabase.from("custom_pages").select("*").order("position");
-    setPages(data || []);
+    const { data, error } = await supabase.from("custom_pages").select("*").order("position");
+    if (error) {
+      toast.error(`Failed to load custom pages: ${error.message}`);
+      setPages([]);
+    } else {
+      setPages(data || []);
+    }
   }, []);
   useEffect(() => { load(); }, [load]);
 
@@ -316,7 +326,11 @@ function HomeContentManager() {
   const load = useCallback(async () => {
     const { data, error } = await supabase.from("site_sections").select("*").order("position");
     if (error) toast.error(error.message);
-    setSections(data || []);
+    if (data) {
+      setSections(data);
+    } else {
+      setSections([]);
+    }
   }, []);
   useEffect(() => { load(); }, [load]);
 
@@ -384,11 +398,13 @@ export default function Admin() {
   const { user, isAdmin, loading } = useAuth();
   const [hasAdmins, setHasAdmins] = useState<boolean | null>(null);
   const { t } = useTranslation();
+  const [isCheckingAdmin, setIsCheckingAdmin] = useState(true);
 
   useEffect(() => {
+    setIsCheckingAdmin(true);
     supabase.from("user_roles").select("id", { count: "exact", head: true }).eq("role", "admin")
-      .then(({ count }) => setHasAdmins((count ?? 0) > 0));
-  }, []);
+      .then(({ count }) => { setHasAdmins((count ?? 0) > 0); setIsCheckingAdmin(false); });
+  }, [isAdmin]); // Re-check when isAdmin status might have changed
 
   const grantSelfAdmin = async () => {
     if (!user) return;
@@ -398,11 +414,11 @@ export default function Admin() {
     else { toast.error(t("admin.claim.already_exists", "An admin already exists. Ask them to grant you access.")); }
   };
 
-  if (loading) return <Layout><div className="p-12 text-center"><Loader2 className="h-6 w-6 animate-spin mx-auto" /></div></Layout>;
+  if (loading || isCheckingAdmin) return <Layout><div className="p-12 text-center"><Loader2 className="h-6 w-6 animate-spin mx-auto" /></div></Layout>;
   if (!user) return <Navigate to="/auth" replace />;
 
   // Bootstrap: if no admins exist yet, let the first signed-in user claim it.
-  if (!isAdmin && hasAdmins === false) {
+  if (user && !isAdmin && hasAdmins === false) {
     return (
       <Layout>
         <div className="container mx-auto px-4 py-16 max-w-md text-center space-y-4">

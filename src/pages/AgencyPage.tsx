@@ -11,7 +11,7 @@ import { uploadApplicationFile } from "@/lib/uploads";
 import { toast } from "sonner";
 import { Loader2, ShieldCheck } from "lucide-react";
 import PhoneInput from "@/components/PhoneInput";
-import PhoneOTPAuth from "@/components/PhoneOTPAuth";
+import EmailOTPAuth from "@/components/EmailOTPAuth";
 import CurrencyInput from "@/components/CurrencyInput";
 
 export default function Agency() {
@@ -31,8 +31,8 @@ export default function Agency() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!phoneVerified) {
-      toast.error("Please verify your phone number with OTP before submitting.");
-      return;
+      toast.warning("Phone verification was skipped. Your submission will still be sent, but we may not be able to reach you by phone.");
+      // Do not return, allow submission
     }
     if (!licenseFile) { toast.error("Agency license PDF is required."); return; }
     setSubmitting(true);
@@ -48,6 +48,7 @@ export default function Agency() {
     toast.success("Agency submission received privately by admin.");
     setForm({ agency_name: "", contact_number: "", email: "", job_position: "", agency_address: "", location: "", company_name: "", salary: "", salary_currency: "INR", job_expiry_date: "", job_type: "full_time", responsibilities: "" });
     setLicenseFile(undefined);
+    setPhoneVerified(false);
   };
 
   return (
@@ -100,7 +101,7 @@ export default function Agency() {
           </div>
           <div><Label>Responsibilities</Label><Textarea rows={4} value={form.responsibilities} onChange={set("responsibilities")} /></div>
           <div><Label>Agency License (PDF) *</Label><Input required type="file" accept=".pdf,image/*" onChange={(e) => setLicenseFile(e.target.files?.[0])} /></div>
-          <Button type="submit" disabled={submitting || !phoneVerified} className="w-full bg-primary-gradient" size="lg"> 
+          <Button type="submit" disabled={submitting} className="w-full bg-primary-gradient" size="lg"> 
             {submitting && <Loader2 className="h-4 w-4 mr-2 animate-spin" />} Submit Agency Registration
           </Button>
         </form>

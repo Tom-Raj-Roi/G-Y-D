@@ -62,6 +62,26 @@ CREATE TRIGGER on_auth_user_created
 AFTER INSERT ON auth.users FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
 
 -- =========================================================
+-- CLAIM FIRST ADMIN (RPC)
+-- =========================================================
+CREATE OR REPLACE FUNCTION public.claim_first_admin()
+RETURNS BOOLEAN
+LANGUAGE plpgsql SECURITY DEFINER SET search_path = public AS $$
+DECLARE
+  admin_exists BOOLEAN;
+BEGIN
+  SELECT EXISTS (SELECT 1 FROM public.user_roles WHERE role = 'admin') INTO admin_exists;
+  IF NOT admin_exists THEN
+    INSERT INTO public.user_roles (user_id, role)
+    VALUES (auth.uid(), 'admin');
+    RETURN TRUE;
+  ELSE
+    RETURN FALSE;
+  END IF;
+END;
+$$;
+
+-- =========================================================
 -- SITE CONTENT (inline editable text/image blocks)
 -- =========================================================
 CREATE TABLE public.site_content (

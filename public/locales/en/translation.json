@@ -1,4 +1,4 @@
-﻿{
+﻿﻿{
   "welcome": "Welcome to Get Your Dreams",
   "home": {
     "whoWeAre": {
@@ -58,10 +58,15 @@
     "error_missing_phone": "Phone number is required.",
     "error_send_failed": "Failed to send OTP. Please try again.",
     "error_too_many_requests": "Too many requests. Please wait a few minutes and try again.",
+    "error_operation_not_allowed": "Phone authentication is not enabled. Please contact the site administrator.",
     "error_invalid_code": "Please enter the 6-digit code.",
     "error_verify_failed": "Verification failed. Please check the code and try again.",
     "error_code_expired": "The code has expired. Please resend the OTP.",
-    "error_recaptcha_expired": "reCAPTCHA expired. Please try again."
+    "error_recaptcha_expired": "reCAPTCHA expired. Please try again.",
+    "error_firebase_not_configured": "Firebase is not configured. Phone verification is disabled.",
+    "skip_verification": "Skip Phone Verification",
+    "email_not_confirmed": "Please verify your email address before signing in. Check your inbox for a confirmation link.",
+    "signin_error": "An unexpected error occurred during sign-in. Please try again."
   },
   "header": {
     "send_cv_here": "(send CV here)",

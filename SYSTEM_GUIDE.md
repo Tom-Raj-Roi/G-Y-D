@@ -31,6 +31,16 @@ Phone number verification is now handled client-side via **Firebase Phone Authen
 - `email_verified` is set to `false` by default; email verification can be added separately.
 - **Prerequisites:** add your Firebase Web App credentials to `.env` and enable **Phone Authentication** in the Firebase Console → Authentication → Sign-in method.
 
+### reCAPTCHA verifier
+
+`PhoneOTPAuth` uses Firebase's `RecaptchaVerifier` with **invisible** reCAPTCHA (`size: "invisible"`). The verifier is created lazily when the user clicks "Send SMS Verification Code" and is automatically torn down (via `clear()`) on phone-number change and unmount to prevent the "reCAPTCHA has already been rendered" error.
+
+Key features:
+
+- **Localization:** The component sets `firebaseAuth.languageCode` to the current app language (from `useLanguage()`), which localizes both the reCAPTCHA widget and the SMS message sent to the user.
+- **Pre-rendering:** The reCAPTCHA is pre-rendered via `verifier.render()` so the widget is ready before the user submits the sign-in request. The widget ID is stored on `window.recaptchaWidgetId` for potential manual API calls (e.g. `grecaptcha.reset`).
+- **Testing with fictional phone numbers:** Pass `testMode={true}` to the component or set `VITE_OTP_TEST_MODE=true` in `.env` to enable `appVerificationDisabledForTesting`. This makes Firebase automatically resolve the reCAPTCHA so you can test with fictional phone numbers (configured in the Firebase Console → Authentication → Sign-in method → Phone numbers for testing) without solving a real challenge. **Never enable this in production.**
+
 The old server-side `otp_codes` table was dropped by migration `20260715000000_admin_notifications_and_remove_otp.sql`.
 
 ## Language / translation

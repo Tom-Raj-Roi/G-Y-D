@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
 import Layout from "@/components/Layout";
@@ -20,6 +20,7 @@ export default function Auth() {
   const [password, setPassword] = useState("");
   const [fullName, setFullName] = useState("");
   const [isPasswordRecovery, setIsPasswordRecovery] = useState(false);
+  const signUpFullNameRef = useRef<HTMLInputElement>(null);
 
   const set = (setter: React.Dispatch<React.SetStateAction<string>>) => (e: React.ChangeEvent<HTMLInputElement>) =>
     setter(e.target.value);
@@ -42,20 +43,34 @@ export default function Auth() {
 
   const handlePasswordReset = async () => {
     if (!email) return toast.error(translate("auth.toast.email_required", "Please enter your email address first."));
+    setLoading(true);
     const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo: `${window.location.origin}/` });
+    setLoading(false);
     if (error) toast.error(error.message); else toast.success(translate("auth.toast.password_reset_sent", "Password reset link sent to your email."));
   };
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    const { error } = await signIn(email, password);
-    setLoading(false);
-    if (error) {
-      toast.error(error.message);
-    } else {
-      toast.success(translate("auth.toast.signed_in", "Signed in"));
-      navigate("/admin");
+    try {
+      const { error } = await signIn(email, password);
+      if (error) {
+        if (error.message.includes("Email not confirmed")) {
+          toast.error(translate("auth.toast.email_not_confirmed", "Please verify your email address before signing in. Check your inbox for a confirmation link."));
+        } else {
+          toast.error(error.message);
+        }
+      } else {
+        toast.success(translate("auth.toast.signed_in", "Signed in"));
+        // Clear form only on successful sign-in, before navigating
+        setEmail("");
+        setPassword("");
+        navigate("/admin");
+      }
+    } catch (err) {
+      toast.error(translate("auth.toast.signin_error", "An unexpected error occurred during sign-in. Please try again."));
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -68,9 +83,8 @@ export default function Auth() {
       toast.error(error.message);
     } else {
       toast.success(translate("auth.toast.account_created", "Account created! Please check your email to verify your account before signing in."));
-      // Reset form fields after successful sign-up
+      // Reset some fields, but keep email for convenience
       setFullName("");
-      setEmail("");
       setPassword("");
     }
   };
@@ -97,26 +111,30 @@ export default function Auth() {
     <Layout>
       <div className="container mx-auto px-4 py-16 max-w-md">
         <h1 className="font-display font-bold text-3xl text-gradient mb-6 text-center">{translate("auth.title", "Admin Access")}</h1>
-        <Tabs defaultValue="signin" className="bg-card border rounded-2xl p-6 shadow-card">
+        <Tabs defaultValue="signin" className="bg-card border rounded-2xl p-6 shadow-card" onValueChange={(tab) => {
+          if (tab === 'signup') {
+            setTimeout(() => signUpFullNameRef.current?.focus(), 0);
+          }
+        }}>
           <TabsList className="grid w-full grid-cols-2 mb-6">
             <TabsTrigger value="signin">{translate("auth.signin_tab", "Sign In")}</TabsTrigger>
             <TabsTrigger value="signup">{translate("auth.signup_tab", "Sign Up")}</TabsTrigger>
           </TabsList>
           <TabsContent value="signin">
             <form onSubmit={handleSignIn} className="space-y-4">
-              <div><Label>{translate("auth.email", "Email")}</Label><Input required type="email" value={email} onChange={set(setEmail)} /></div>
+              <div><Label>{translate("auth.email", "Email")}</Label><Input autoFocus required type="email" value={email} onChange={set(setEmail)} /></div>
               <div><Label>{translate("auth.password", "Password")}</Label><Input required type="password" value={password} onChange={set(setPassword)} /></div>
               <Button type="submit" disabled={loading} className="w-full bg-primary-gradient">
                 {loading && <Loader2 className="h-4 w-4 mr-2 animate-spin" />} {translate("auth.signin_button", "Sign In")}
               </Button>
               <div className="text-center">
-                <Button variant="link" type="button" onClick={handlePasswordReset} className="text-xs">{translate("auth.forgot_password", "Forgot password?")}</Button>
+                <Button variant="link" type="button" onClick={handlePasswordReset} disabled={loading} className="text-xs">{translate("auth.forgot_password", "Forgot password?")}</Button>
               </div>
             </form>
           </TabsContent>
           <TabsContent value="signup">
             <form onSubmit={handleSignUp} className="space-y-4">
-              <div><Label>{translate("auth.full_name", "Full Name")}</Label><Input value={fullName} onChange={set(setFullName)} /></div>
+              <div><Label>{translate("auth.full_name", "Full Name")}</Label><Input ref={signUpFullNameRef} value={fullName} onChange={set(setFullName)} /></div>
               <div><Label>{translate("auth.email", "Email")}</Label><Input required type="email" value={email} onChange={set(setEmail)} /></div>
               <div><Label>{translate("auth.password", "Password")}</Label><Input required type="password" minLength={6} value={password} onChange={set(setPassword)} /></div>
               <Button type="submit" disabled={loading} className="w-full bg-primary-gradient">
@@ -137,7 +155,7 @@ export default function Auth() {
             </form>
           </div>
         )}
-        <p className="text-center mt-4"><Link to="/" className="text-sm text-muted-foreground hover:text-primary">{translate("auth.back_to_home", "← Back to home")}</Link></p>
+        <p className="text-center mt-4"><Link to="/" className="text-sm text-muted-foreground hover:text-primary">&larr; {translate("auth.back_to_home", "Back to home")}</Link></p>
       </div>
     </Layout>
   );

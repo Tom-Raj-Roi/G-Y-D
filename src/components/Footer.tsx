@@ -90,7 +90,7 @@ export default function Footer() {
         </div>
 
         <div>
-          <h4 className="font-display font-bold mb-4 text-accent">{translate("contact", "Contact")}</h4>
+          <h4 className="font-display font-bold mb-4 text-accent">{translate("footer.contact_heading", "Contact")}</h4>
           <ul className="space-y-2 text-sm text-primary-foreground/80">
             <li className="flex items-start gap-2">
               <Phone className="h-4 w-4 mt-0.5 shrink-0" />

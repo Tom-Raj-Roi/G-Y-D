@@ -11,7 +11,7 @@ import { toast } from "sonner";
 import { Loader2, Mail } from "lucide-react";
 import PhoneInput from "@/components/PhoneInput";
 import CurrencyInput from "@/components/CurrencyInput";
-import PhoneOTPAuth from "@/components/PhoneOTPAuth";
+import EmailOTPAuth from "@/components/EmailOTPAuth";
 import PageNav from "@/components/PageNav";
 import { useLanguage } from "@/contexts/LanguageContext";
 
@@ -33,8 +33,8 @@ export default function JobSeekers() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!phoneVerified) {
-      toast.error(translate("contact.toast.phone_not_verified", "Please verify your phone number with OTP before submitting."));
-      return;
+      toast.warning(translate("contact.toast.phone_not_verified", "Phone verification was skipped. Your message will still be sent, but we may not be able to reach you by phone."));
+      // Do not return, allow submission
     }
     if (!files.cv) { toast.error(translate("job_seekers.toast.cv_required", "CV is required.")); return; }
     setSubmitting(true);
@@ -130,7 +130,7 @@ export default function JobSeekers() {
             <div><Label>{translate("form.degree_certificates", "Degree Certificates (optional)")}</Label><Input type="file" accept="image/*" onChange={(e) => setFiles({ ...files, cert: e.target.files?.[0] })} /></div>
           </div>
 
-          <Button type="submit" disabled={submitting || !phoneVerified} className="w-full bg-primary-gradient" size="lg">
+          <Button type="submit" disabled={submitting} className="w-full bg-primary-gradient" size="lg">
             {submitting && <Loader2 className="h-4 w-4 mr-2 animate-spin" />} {translate("form.submit_application", "Submit Application")}
           </Button>
         </form>

@@ -8,7 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Loader2, Mail, Phone } from "lucide-react";
 import PhoneInput from "@/components/PhoneInput";
-import PhoneOTPAuth from "@/components/PhoneOTPAuth";
+import EmailOTPAuth from "@/components/EmailOTPAuth";
 import { useLanguage } from "@/contexts/LanguageContext";
 
 function generateCaptcha() {
@@ -34,8 +34,7 @@ export default function Contact() {
       return;
     }
     if (!phoneVerified) {
-      toast.error(translate("contact.toast.phone_not_verified", "Please verify your phone number with OTP before submitting."));
-      return;
+      toast.warning(translate("contact.toast.phone_not_verified", "Phone verification was skipped. Your message will still be sent, but we may not be able to reach you by phone."));
     }
     setSubmitting(true);
     const { error } = await supabase.from("contacts").insert({
@@ -108,7 +107,7 @@ export default function Contact() {
             <Input value={captchaInput} onChange={(e) => setCaptchaInput(e.target.value)} className="w-24" placeholder={translate("form.captcha_answer", "Answer")} />
             <Button type="button" variant="ghost" size="sm" onClick={() => { setCaptcha(generateCaptcha()); setCaptchaInput(""); }}>{translate("form.captcha_refresh", "Refresh")}</Button>
           </div>
-          <Button type="submit" disabled={submitting || !phoneVerified} className="w-full bg-primary-gradient" size="lg">
+          <Button type="submit" disabled={submitting} className="w-full bg-primary-gradient" size="lg">
             {submitting && <Loader2 className="h-4 w-4 mr-2 animate-spin" />} {translate("form.send_message", "Send Message")}
           </Button>
         </form>

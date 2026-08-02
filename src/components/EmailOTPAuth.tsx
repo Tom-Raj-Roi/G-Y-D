@@ -4,6 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Loader2, CheckCircle, AlertCircle } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { supabase } from "@/integrations/supabase/client";
 import { generateNumericOtp } from "@/lib/otp";
 
 type EmailOTPAuthProps = {
@@ -77,11 +78,13 @@ export default function EmailOTPAuth({ email, onVerified, defaultVerified = fals
       const storageKey = `email-otp:${normalizedEmail}`;
       window.localStorage.setItem(storageKey, generatedCode);
 
-      // This uses your existing Supabase function integration to send the verification code.
-      // If the function is not deployed yet, the UI will surface the error clearly.
-      const response = await fetch("/functions/v1/send-otp-email", {
+      const functionUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/send-otp-email`;
+      const response = await fetch(functionUrl, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
+        },
         body: JSON.stringify({ email: normalizedEmail, otp: generatedCode }),
       });
 

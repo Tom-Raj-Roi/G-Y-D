@@ -10,10 +10,10 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Loader2, ShieldCheck, Mail } from "lucide-react";
 import PhoneInput from "@/components/PhoneInput";
-import PhoneOTPAuth from "@/components/PhoneOTPAuth";
 import CurrencyInput from "@/components/CurrencyInput";
 import EmailOTPAuth from "@/components/EmailOTPAuth";
 import PageNav from "@/components/PageNav";
+import { isValidEmail, normalizePhone, sanitizeEmail, sanitizeText } from "@/lib/form-security";
 
 export default function JobReferrer() {
   const [form, setForm] = useState({
@@ -21,31 +21,52 @@ export default function JobReferrer() {
     salary: "", salary_currency: "INR", location: "", job_expiry_date: "", job_type: "full_time", responsibilities: "",
   });
   const [submitting, setSubmitting] = useState(false);
-  const [phoneVerified, setPhoneVerified] = useState(false);
-  const formattedPhone = form.contact_number.replace(/\s+/g, "");
+  const [emailVerified, setEmailVerified] = useState(false);
 
   const set = (k: keyof typeof form) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
     setForm((f) => ({ ...f, [k]: e.target.value }));
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!phoneVerified) {
-      toast.warning("Phone verification was skipped. Your submission will still be sent, but we may not be able to reach you by phone.");
-      // Do not return, allow submission
+    const safeName = sanitizeText(form.name);
+    const safeCompanyName = sanitizeText(form.company_name);
+    const safeJobPosition = sanitizeText(form.job_position);
+    const safeEmail = sanitizeEmail(form.email);
+    const safePhone = normalizePhone(form.contact_number);
+
+    if (!safeName || !safeEmail || !safeJobPosition) {
+      toast.error("Please fill in the required job referrer details.");
+      return;
+    }
+    if (!isValidEmail(safeEmail)) {
+      toast.error("Please enter a valid email address.");
+      return;
+    }
+    if (!emailVerified) {
+      toast.warning("Please verify your email address before submitting.");
+      return;
     }
     setSubmitting(true);
     const { error } = await supabase.from("job_referrers").insert({
-      ...form,
+      name: safeName,
+      contact_number: safePhone,
+      email: safeEmail,
+      job_position: safeJobPosition,
+      company_name: safeCompanyName,
+      salary: sanitizeText(form.salary),
+      salary_currency: form.salary_currency,
+      location: sanitizeText(form.location),
       job_expiry_date: form.job_expiry_date || null,
       job_type: form.job_type as "full_time" | "part_time" | "freelancer" | "other",
-      phone_verified: phoneVerified,
-      email_verified: false,
+      responsibilities: sanitizeText(form.responsibilities),
+      phone_verified: false,
+      email_verified: true,
     });
     setSubmitting(false);
     if (error) { toast.error(error.message); return; }
     toast.success("Job posting submitted privately to admin.");
     setForm({ name: "", contact_number: "", email: "", job_position: "", company_name: "", salary: "", salary_currency: "INR", location: "", job_expiry_date: "", job_type: "full_time", responsibilities: "" });
-    setPhoneVerified(false);
+    setEmailVerified(false);
   };
 
   return (
@@ -74,12 +95,12 @@ export default function JobReferrer() {
             <Label>Contact Number *</Label>
             <PhoneInput required value={form.contact_number} onChange={(v) => setForm((f) => ({ ...f, contact_number: v }))} />
           </div>
-          {form.contact_number && formattedPhone.startsWith("+") && (
+          {form.email && (
             <div className="p-4 border rounded-lg bg-muted/20">
               <p className="text-sm text-muted-foreground mb-2">
-                Verify your phone number via SMS to ensure we can reach you.
+                Verify your email address using the free Supabase OTP service.
               </p>
-              <PhoneOTPAuth phoneNumber={formattedPhone} onVerified={setPhoneVerified} />
+              <EmailOTPAuth email={sanitizeEmail(form.email)} onVerified={setEmailVerified} />
             </div>
           )}
           <div>

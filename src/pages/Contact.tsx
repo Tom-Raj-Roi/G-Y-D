@@ -8,9 +8,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Loader2, Mail, Phone } from "lucide-react";
 import PhoneInput from "@/components/PhoneInput";
-import PhoneOTPAuth from "@/components/PhoneOTPAuth";
 import EmailOTPAuth from "@/components/EmailOTPAuth";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { isValidEmail, normalizePhone, sanitizeEmail, sanitizeText, validateUpload } from "@/lib/form-security";
 
 function generateCaptcha() {
   const a = Math.floor(Math.random() * 9) + 1;
@@ -24,8 +24,7 @@ export default function Contact() {
   const [captcha, setCaptcha] = useState(generateCaptcha());
   const [captchaInput, setCaptchaInput] = useState("");
   const [submitting, setSubmitting] = useState(false);
-  const [phoneVerified, setPhoneVerified] = useState(false);
-  const formattedPhone = form.contact_number.replace(/\s+/g, "");
+  const [emailVerified, setEmailVerified] = useState(false);
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -34,21 +33,40 @@ export default function Contact() {
       setCaptcha(generateCaptcha()); setCaptchaInput("");
       return;
     }
-    if (!phoneVerified) {
-      toast.warning(translate("contact.toast.phone_not_verified", "Phone verification was skipped. Your message will still be sent, but we may not be able to reach you by phone."));
+    const safeName = sanitizeText(form.name);
+    const safeSubject = sanitizeText(form.subject);
+    const safeDetails = sanitizeText(form.details);
+    const safeEmail = sanitizeEmail(form.email);
+    const safePhone = normalizePhone(form.contact_number);
+
+    if (!safeName || !safeEmail || !safeSubject || !safeDetails) {
+      toast.error("Please fill in all required fields.");
+      return;
+    }
+    if (!isValidEmail(safeEmail)) {
+      toast.error("Please enter a valid email address.");
+      return;
+    }
+    if (!emailVerified) {
+      toast.warning("Please verify your email address before sending the form.");
+      return;
     }
     setSubmitting(true);
     const { error } = await supabase.from("contacts").insert({
-      ...form,
-      phone_verified: phoneVerified,
-      email_verified: false,
+      name: safeName,
+      contact_number: safePhone,
+      email: safeEmail,
+      subject: safeSubject,
+      details: safeDetails,
+      phone_verified: false,
+      email_verified: true,
     });
     setSubmitting(false);
     if (error) { toast.error(error.message); return; }
     toast.success(translate("contact.toast.success", "Message sent! We'll be in touch soon."));
     setForm({ name: "", contact_number: "", email: "", subject: "", details: "" });
     setCaptcha(generateCaptcha()); setCaptchaInput("");
-    setPhoneVerified(false);
+    setEmailVerified(false);
   };
 
   return (
@@ -89,12 +107,12 @@ export default function Contact() {
             <Label>{translate("form.phone", "Phone")} *</Label>
             <PhoneInput required value={form.contact_number} onChange={(v) => setForm({ ...form, contact_number: v })} />
           </div>
-          {form.contact_number && formattedPhone.startsWith("+") && (
+          {form.email && (
             <div className="p-4 border rounded-lg bg-muted/20">
               <p className="text-sm text-muted-foreground mb-2">
-                {translate("contact.phone_verification", "Verify your phone number via SMS to ensure we can reach you.")}
+                Verify your email address using the free Supabase OTP service.
               </p>
-              <PhoneOTPAuth phoneNumber={formattedPhone} onVerified={setPhoneVerified} />
+              <EmailOTPAuth email={sanitizeEmail(form.email)} onVerified={setEmailVerified} />
             </div>
           )}
           <div>

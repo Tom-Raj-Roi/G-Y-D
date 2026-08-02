@@ -10,11 +10,11 @@ import { uploadApplicationFile } from "@/lib/uploads";
 import { toast } from "sonner";
 import { Loader2, Mail } from "lucide-react";
 import PhoneInput from "@/components/PhoneInput";
-import PhoneOTPAuth from "@/components/PhoneOTPAuth";
 import CurrencyInput from "@/components/CurrencyInput";
 import EmailOTPAuth from "@/components/EmailOTPAuth";
 import PageNav from "@/components/PageNav";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { isValidEmail, normalizePhone, sanitizeEmail, sanitizeText, validateUpload } from "@/lib/form-security";
 
 export default function JobSeekers() {
   const { translate } = useLanguage();
@@ -25,35 +25,61 @@ export default function JobSeekers() {
   });
   const [files, setFiles] = useState<{ cv?: File; cover?: File; passport?: File; cert?: File }>({});
   const [submitting, setSubmitting] = useState(false);
-  const [phoneVerified, setPhoneVerified] = useState(false);
-  const formattedPhone = form.contact_number.replace(/\s+/g, "");
+  const [emailVerified, setEmailVerified] = useState(false);
 
   const set = (k: keyof typeof form) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
     setForm((f) => ({ ...f, [k]: e.target.value }));
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!phoneVerified) {
-      toast.warning(translate("contact.toast.phone_not_verified", "Phone verification was skipped. Your message will still be sent, but we may not be able to reach you by phone."));
-      // Do not return, allow submission
+    const safeName = sanitizeText(form.name);
+    const safeEmail = sanitizeEmail(form.email);
+    const safeDesignation = sanitizeText(form.designation);
+    const safePhone = normalizePhone(form.contact_number);
+
+    if (!safeName || !safeEmail || !safeDesignation) {
+      toast.error(translate("job_seekers.toast.required_fields", "Please fill in the required fields."));
+      return;
     }
-    if (!files.cv) { toast.error(translate("job_seekers.toast.cv_required", "CV is required.")); return; }
+    if (!isValidEmail(safeEmail)) {
+      toast.error(translate("job_seekers.toast.invalid_email", "Please enter a valid email address."));
+      return;
+    }
+    const cvCheck = validateUpload(files.cv, "document");
+    if (!cvCheck.ok) {
+      toast.error(cvCheck.reason);
+      return;
+    }
+    if (!emailVerified) {
+      toast.warning(translate("contact.toast.email_not_verified", "Please verify your email address before submitting."));
+      return;
+    }
     setSubmitting(true);
-    const cv_url = await uploadApplicationFile(files.cv, "seekers/cv");
+    const cv_url = await uploadApplicationFile(files.cv!, "seekers/cv");
     const cover_letter_url = files.cover ? await uploadApplicationFile(files.cover, "seekers/cover") : null;
     const passport_url = files.passport ? await uploadApplicationFile(files.passport, "seekers/passport") : null;
     const certificates_url = files.cert ? await uploadApplicationFile(files.cert, "seekers/cert") : null;
 
     const { error } = await supabase.from("job_seekers").insert({
-      ...form, cv_url, cover_letter_url, passport_url, certificates_url, phone_verified: phoneVerified,
-      email_verified: false,
+      name: safeName,
+      contact_number: safePhone,
+      email: safeEmail,
+      designation: safeDesignation,
+      expected_salary: sanitizeText(form.expected_salary),
+      salary_currency: form.salary_currency,
+      experience: sanitizeText(form.experience),
+      expected_country: sanitizeText(form.expected_country),
+      current_position: sanitizeText(form.current_position),
+      native_country: sanitizeText(form.native_country),
+      cv_url, cover_letter_url, passport_url, certificates_url, phone_verified: false,
+      email_verified: true,
     });
     setSubmitting(false);
     if (error) { toast.error(error.message); return; }
     toast.success(translate("job_seekers.toast.success", "Your application has been submitted! Our team will reach out shortly."));
     setForm({ name: "", contact_number: "", email: "", designation: "", expected_salary: "", salary_currency: "INR", experience: "", expected_country: "", current_position: "", native_country: "" });
     setFiles({});
-    setPhoneVerified(false);
+    setEmailVerified(false);
   };
 
   return (
@@ -82,12 +108,12 @@ export default function JobSeekers() {
             <Label>{translate("form.contact_number", "Contact Number")} *</Label>
             <PhoneInput required value={form.contact_number} onChange={(v) => setForm((f) => ({ ...f, contact_number: v }))} />
           </div>
-          {form.contact_number && formattedPhone.startsWith("+") && (
+          {form.email && (
             <div className="p-4 border rounded-lg bg-muted/20">
               <p className="text-sm text-muted-foreground mb-2">
-                {translate("contact.phone_verification", "Verify your phone number via SMS to ensure we can reach you.")}
+                {translate("contact.email_verification", "Verify your email address using the free Supabase OTP service.")}
               </p>
-              <PhoneOTPAuth phoneNumber={formattedPhone} onVerified={setPhoneVerified} />
+              <EmailOTPAuth email={sanitizeEmail(form.email)} onVerified={setEmailVerified} />
             </div>
           )}
           <div>

@@ -1,8 +1,8 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Loader2, CheckCircle, AlertCircle, Mail } from "lucide-react";
+import { Loader2, CheckCircle, AlertCircle } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -65,7 +65,8 @@ export default function EmailOTPAuth({ email, onVerified, defaultVerified = fals
   };
 
   const sendOTP = async () => {
-    if (!email || !email.includes("@")) {
+    const normalizedEmail = email.trim().toLowerCase();
+    if (!normalizedEmail || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalizedEmail)) {
       setErrorMsg(translate("otp.error_invalid_email", "Please enter a valid email address."));
       setStep("error");
       return;
@@ -74,10 +75,9 @@ export default function EmailOTPAuth({ email, onVerified, defaultVerified = fals
     setErrorMsg("");
 
     try {
-      // Supabase sends a 6-digit OTP code to the email (no magic link since
-      // we don't pass emailRedirectTo). This uses the free Supabase Auth service.
-      const { error } = await supabase.auth.signInWithOtp({ email });
+      const { error } = await supabase.auth.signInWithOtp({ email: normalizedEmail });
       if (error) throw error;
+
       setStep("sent");
       startResendCountdown();
     } catch (err) {
@@ -91,23 +91,27 @@ export default function EmailOTPAuth({ email, onVerified, defaultVerified = fals
   };
 
   const verifyOTP = async () => {
-    if (!otp || otp.length < 6) {
+    const normalizedEmail = email.trim().toLowerCase();
+    const enteredCode = otp.replace(/\D/g, "").slice(0, 6);
+
+    if (!enteredCode || enteredCode.length < 6) {
       setErrorMsg(translate("otp.error_invalid_code", "Please enter the 6-digit code."));
       return;
     }
+
     setStep("verifying");
     setErrorMsg("");
     try {
       const { error } = await supabase.auth.verifyOtp({
-        email,
-        token: otp,
+        email: normalizedEmail,
+        token: enteredCode,
         type: "email",
       });
       if (error) throw error;
+
       setIsVerified(true);
       setStep("verified");
       onVerified(true);
-      // Sign out to avoid leaving a session for form-only verification.
       await supabase.auth.signOut();
     } catch (err) {
       const error = err as SupabaseErrorLike;
@@ -150,7 +154,7 @@ export default function EmailOTPAuth({ email, onVerified, defaultVerified = fals
         <>
           <div className="space-y-2">
             <Label htmlFor="email-otp" className="text-sm">
-              {translate("otp.enter_code", "Enter the 6-digit code sent to")} {email}
+              {translate("otp.enter_code", "Enter the 8-digit code sent to")} {email}
             </Label>
             <Input
               id="email-otp"
@@ -158,7 +162,7 @@ export default function EmailOTPAuth({ email, onVerified, defaultVerified = fals
               inputMode="numeric"
               pattern="[0-9]*"
               value={otp}
-              onChange={(e) => setOtp(e.target.value.replace(/\D/g, "").slice(0, 6))}
+              onChange={(e) => setOtp(e.target.value.replace(/\D/g, "").slice(0, 8))}
               placeholder={translate("otp.code_placeholder", "------")}
               maxLength={6}
               className="font-mono text-center text-lg tracking-widest"

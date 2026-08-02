@@ -14,6 +14,8 @@ import { COUNTRIES, JOB_TYPES } from "@/lib/countries";
 import { INDUSTRIES } from "@/lib/dial-codes";
 import { findCurrencyByCode } from "@/lib/currencies";
 import PhoneInput from "@/components/PhoneInput";
+import EmailOTPAuth from "@/components/EmailOTPAuth";
+import { isValidEmail, normalizePhone, sanitizeEmail, sanitizeText, validateUpload } from "@/lib/form-security";
 
 interface Vacancy {
   id: string; position: string; company_name: string | null; location: string | null;
@@ -26,23 +28,56 @@ function ApplyDialog({ vacancy }: { vacancy: Vacancy }) {
   const [files, setFiles] = useState<{ cv?: File; cover?: File; cert?: File; passport?: File }>({});
   const [submitting, setSubmitting] = useState(false);
   const [open, setOpen] = useState(false);
+  const [emailVerified, setEmailVerified] = useState(false);
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!files.cv) { toast.error("CV is required."); return; }
+    const safeName = sanitizeText(form.name);
+    const safeEmail = sanitizeEmail(form.email);
+    const safePhone = normalizePhone(form.contact_number);
+
+    if (!safeName || !safeEmail) {
+      toast.error("Please fill in your name and email.");
+      return;
+    }
+    if (!isValidEmail(safeEmail)) {
+      toast.error("Please enter a valid email address.");
+      return;
+    }
+    const cvCheck = validateUpload(files.cv, "document");
+    if (!cvCheck.ok) {
+      toast.error(cvCheck.reason);
+      return;
+    }
+    if (!emailVerified) {
+      toast.warning("Please verify your email address before applying.");
+      return;
+    }
     setSubmitting(true);
-    const cv_url = await uploadApplicationFile(files.cv, `applications/${vacancy.id}/cv`);
+    const cv_url = await uploadApplicationFile(files.cv!, `applications/${vacancy.id}/cv`);
     const cover_letter_url = files.cover ? await uploadApplicationFile(files.cover, `applications/${vacancy.id}/cover`) : null;
     const certificate_url = files.cert ? await uploadApplicationFile(files.cert, `applications/${vacancy.id}/cert`) : null;
     const passport_url = files.passport ? await uploadApplicationFile(files.passport, `applications/${vacancy.id}/passport`) : null;
 
     const { error } = await supabase.from("vacancy_applications").insert({
-      vacancy_id: vacancy.id, ...form, cv_url, cover_letter_url, certificate_url, passport_url,
-      phone_verified: true, email_verified: true,
+      vacancy_id: vacancy.id,
+      name: safeName,
+      contact_number: safePhone,
+      email: safeEmail,
+      experience: sanitizeText(form.experience),
+      cv_url,
+      cover_letter_url,
+      certificate_url,
+      passport_url,
+      phone_verified: false,
+      email_verified: true,
     });
     setSubmitting(false);
     if (error) { toast.error(error.message); return; }
     toast.success("Application submitted!");
+    setForm({ name: "", contact_number: "", email: "", experience: "" });
+    setFiles({});
+    setEmailVerified(false);
     setOpen(false);
   };
 
@@ -63,6 +98,12 @@ function ApplyDialog({ vacancy }: { vacancy: Vacancy }) {
             <Label>Email *</Label>
             <Input required type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} />
           </div>
+          {form.email && (
+            <div className="p-3 border rounded-lg bg-muted/20">
+              <p className="text-sm text-muted-foreground mb-2">Verify your email address before submitting your application.</p>
+              <EmailOTPAuth email={sanitizeEmail(form.email)} onVerified={setEmailVerified} />
+            </div>
+          )}
           <div><Label>Experience</Label><Input value={form.experience} onChange={(e) => setForm({ ...form, experience: e.target.value })} /></div>
           <div><Label>CV *</Label><Input required type="file" accept=".pdf,.doc,.docx" onChange={(e) => setFiles({ ...files, cv: e.target.files?.[0] })} /></div>
           <div><Label>Cover Letter</Label><Input type="file" accept=".pdf,.doc,.docx" onChange={(e) => setFiles({ ...files, cover: e.target.files?.[0] })} /></div>

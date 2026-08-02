@@ -11,9 +11,9 @@ import { uploadApplicationFile } from "@/lib/uploads";
 import { toast } from "sonner";
 import { Loader2, ShieldCheck } from "lucide-react";
 import PhoneInput from "@/components/PhoneInput";
-import PhoneOTPAuth from "@/components/PhoneOTPAuth";
 import EmailOTPAuth from "@/components/EmailOTPAuth";
 import CurrencyInput from "@/components/CurrencyInput";
+import { isValidEmail, normalizePhone, sanitizeEmail, sanitizeText, validateUpload } from "@/lib/form-security";
 
 export default function Agency() {
   const [form, setForm] = useState({
@@ -23,33 +23,61 @@ export default function Agency() {
   });
   const [licenseFile, setLicenseFile] = useState<File | undefined>();
   const [submitting, setSubmitting] = useState(false);
-  const [phoneVerified, setPhoneVerified] = useState(false);
-  const formattedPhone = form.contact_number.replace(/\s+/g, "");
+  const [emailVerified, setEmailVerified] = useState(false);
 
   const set = (k: keyof typeof form) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
     setForm((f) => ({ ...f, [k]: e.target.value }));
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!phoneVerified) {
-      toast.warning("Phone verification was skipped. Your submission will still be sent, but we may not be able to reach you by phone.");
-      // Do not return, allow submission
+    const safeAgencyName = sanitizeText(form.agency_name);
+    const safeEmail = sanitizeEmail(form.email);
+    const safeCompanyName = sanitizeText(form.company_name);
+    const safeJobPosition = sanitizeText(form.job_position);
+    const safePhone = normalizePhone(form.contact_number);
+
+    if (!safeAgencyName || !safeEmail || !safeJobPosition) {
+      toast.error("Please fill in the required agency details.");
+      return;
     }
-    if (!licenseFile) { toast.error("Agency license PDF is required."); return; }
+    if (!isValidEmail(safeEmail)) {
+      toast.error("Please enter a valid email address.");
+      return;
+    }
+    const licenseCheck = validateUpload(licenseFile, "document");
+    if (!licenseCheck.ok) {
+      toast.error(licenseCheck.reason);
+      return;
+    }
+    if (!emailVerified) {
+      toast.warning("Please verify your email address before submitting.");
+      return;
+    }
     setSubmitting(true);
-    const license_url = await uploadApplicationFile(licenseFile, "agencies/license");
+    const license_url = await uploadApplicationFile(licenseFile!, "agencies/license");
     const { error } = await supabase.from("agencies").insert({
-      ...form,
+      agency_name: safeAgencyName,
+      contact_number: safePhone,
+      email: safeEmail,
+      job_position: safeJobPosition,
+      agency_address: sanitizeText(form.agency_address),
+      location: sanitizeText(form.location),
+      company_name: safeCompanyName,
+      salary: sanitizeText(form.salary),
+      salary_currency: form.salary_currency,
       job_expiry_date: form.job_expiry_date || null,
       job_type: form.job_type as "full_time" | "part_time" | "freelancer" | "other",
-      license_url, phone_verified: phoneVerified, email_verified: false,
+      responsibilities: sanitizeText(form.responsibilities),
+      license_url,
+      phone_verified: false,
+      email_verified: true,
     });
     setSubmitting(false);
     if (error) { toast.error(error.message); return; }
     toast.success("Agency submission received privately by admin.");
     setForm({ agency_name: "", contact_number: "", email: "", job_position: "", agency_address: "", location: "", company_name: "", salary: "", salary_currency: "INR", job_expiry_date: "", job_type: "full_time", responsibilities: "" });
     setLicenseFile(undefined);
-    setPhoneVerified(false);
+    setEmailVerified(false);
   };
 
   return (
@@ -65,12 +93,12 @@ export default function Agency() {
             <Label>Contact Number *</Label>
             <PhoneInput required value={form.contact_number} onChange={(v) => setForm((f) => ({ ...f, contact_number: v }))} />
           </div>
-          {form.contact_number && formattedPhone.startsWith("+") && (
+          {form.email && (
             <div className="p-4 border rounded-lg bg-muted/20">
               <p className="text-sm text-muted-foreground mb-2">
-                Verify your phone number via SMS to ensure we can reach you.
+                Verify your email address using the free Supabase OTP service.
               </p>
-              <PhoneOTPAuth phoneNumber={formattedPhone} onVerified={setPhoneVerified} />
+              <EmailOTPAuth email={sanitizeEmail(form.email)} onVerified={setEmailVerified} />
             </div>
           )}
           <div>

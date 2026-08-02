@@ -60,7 +60,7 @@ export default function JobSeekers() {
     const passport_url = files.passport ? await uploadApplicationFile(files.passport, "seekers/passport") : null;
     const certificates_url = files.cert ? await uploadApplicationFile(files.cert, "seekers/cert") : null;
 
-    const { error } = await supabase.from("job_seekers").insert({
+    const submissionData = {
       name: safeName,
       contact_number: safePhone,
       email: safeEmail,
@@ -73,9 +73,15 @@ export default function JobSeekers() {
       native_country: sanitizeText(form.native_country),
       cv_url, cover_letter_url, passport_url, certificates_url, phone_verified: false,
       email_verified: true,
-    });
+    };
+    const { error } = await supabase.from("job_seekers").insert(submissionData);
     setSubmitting(false);
     if (error) { toast.error(error.message); return; }
+
+    supabase.functions.invoke("notify-admin-on-submission", {
+      body: { subject: `New Job Seeker Application: ${safeName}`, message: `<p>A new job seeker has applied.</p><pre>${JSON.stringify(submissionData, null, 2)}</pre>` },
+    });
+
     toast.success(translate("job_seekers.toast.success", "Your application has been submitted! Our team will reach out shortly."));
     setForm({ name: "", contact_number: "", email: "", designation: "", expected_salary: "", salary_currency: "INR", experience: "", expected_country: "", current_position: "", native_country: "" });
     setFiles({});
@@ -108,6 +114,10 @@ export default function JobSeekers() {
             <Label>{translate("form.contact_number", "Contact Number")} *</Label>
             <PhoneInput required value={form.contact_number} onChange={(v) => setForm((f) => ({ ...f, contact_number: v }))} />
           </div>
+          <div>
+            <Label>{translate("form.email", "Email")} *</Label>
+            <Input required type="email" value={form.email} onChange={set("email")} />
+          </div>
           {form.email && (
             <div className="p-4 border rounded-lg bg-muted/20">
               <p className="text-sm text-muted-foreground mb-2">
@@ -116,10 +126,6 @@ export default function JobSeekers() {
               <EmailOTPAuth email={sanitizeEmail(form.email)} onVerified={setEmailVerified} />
             </div>
           )}
-          <div>
-            <Label>{translate("form.email", "Email")} *</Label>
-            <Input required type="email" value={form.email} onChange={set("email")} />
-          </div>
 
           <div>
             <Label>{translate("form.expected_salary", "Expected Salary")}</Label>

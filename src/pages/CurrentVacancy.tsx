@@ -59,7 +59,7 @@ function ApplyDialog({ vacancy }: { vacancy: Vacancy }) {
     const certificate_url = files.cert ? await uploadApplicationFile(files.cert, `applications/${vacancy.id}/cert`) : null;
     const passport_url = files.passport ? await uploadApplicationFile(files.passport, `applications/${vacancy.id}/passport`) : null;
 
-    const { error } = await supabase.from("vacancy_applications").insert({
+    const submissionData = {
       vacancy_id: vacancy.id,
       name: safeName,
       contact_number: safePhone,
@@ -71,9 +71,15 @@ function ApplyDialog({ vacancy }: { vacancy: Vacancy }) {
       passport_url,
       phone_verified: false,
       email_verified: true,
-    });
+    };
+    const { error } = await supabase.from("vacancy_applications").insert(submissionData);
     setSubmitting(false);
     if (error) { toast.error(error.message); return; }
+
+    supabase.functions.invoke("notify-admin-on-submission", {
+      body: { subject: `New Application for ${vacancy.position}: ${safeName}`, message: `<p>A new application has been submitted for ${vacancy.position}.</p><pre>${JSON.stringify(submissionData, null, 2)}</pre>` },
+    });
+
     toast.success("Application submitted!");
     setForm({ name: "", contact_number: "", email: "", experience: "" });
     setFiles({});
@@ -94,16 +100,16 @@ function ApplyDialog({ vacancy }: { vacancy: Vacancy }) {
             <Label>Phone *</Label>
             <PhoneInput required value={form.contact_number} onChange={(v) => setForm({ ...form, contact_number: v })} />
           </div>
-          <div>
-            <Label>Email *</Label>
-            <Input required type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} />
-          </div>
           {form.email && (
             <div className="p-3 border rounded-lg bg-muted/20">
               <p className="text-sm text-muted-foreground mb-2">Verify your email address before submitting your application.</p>
               <EmailOTPAuth email={sanitizeEmail(form.email)} onVerified={setEmailVerified} />
             </div>
           )}
+          <div>
+            <Label>Email *</Label>
+            <Input required type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} />
+          </div>
           <div><Label>Experience</Label><Input value={form.experience} onChange={(e) => setForm({ ...form, experience: e.target.value })} /></div>
           <div><Label>CV *</Label><Input required type="file" accept=".pdf,.doc,.docx" onChange={(e) => setFiles({ ...files, cv: e.target.files?.[0] })} /></div>
           <div><Label>Cover Letter</Label><Input type="file" accept=".pdf,.doc,.docx" onChange={(e) => setFiles({ ...files, cover: e.target.files?.[0] })} /></div>

@@ -4,7 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Loader2, CheckCircle, AlertCircle } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { supabase } from "@/integrations/supabase/client";
+import { generateNumericOtp } from "@/lib/otp";
 
 type EmailOTPAuthProps = {
   email: string;
@@ -12,7 +12,7 @@ type EmailOTPAuthProps = {
   defaultVerified?: boolean;
 };
 
-type SupabaseErrorLike = { code?: string; message?: string };
+type SupabaseErrorLike = { code?: string; message?: string; msg?: string };
 
 export default function EmailOTPAuth({ email, onVerified, defaultVerified = false }: EmailOTPAuthProps) {
   const { translate } = useLanguage();
@@ -25,11 +25,8 @@ export default function EmailOTPAuth({ email, onVerified, defaultVerified = fals
 
   // Reset state whenever the email changes.
   useEffect(() => {
-    if (isVerified) {
-      setIsVerified(false);
-      onVerified(false);
-    }
     setStep("idle");
+    setIsVerified(false);
     setOtp("");
     setErrorMsg("");
     if (resendTimeoutRef.current) {
@@ -37,7 +34,8 @@ export default function EmailOTPAuth({ email, onVerified, defaultVerified = fals
       resendTimeoutRef.current = null;
     }
     setResendCountdown(0);
-  }, [email, isVerified, onVerified]);
+    onVerified(false);
+  }, [email, onVerified]);
 
   // Cleanup countdown on unmount.
   useEffect(() => {
@@ -75,57 +73,66 @@ export default function EmailOTPAuth({ email, onVerified, defaultVerified = fals
     setErrorMsg("");
 
     try {
-      const { error } = await supabase.auth.signInWithOtp({ email: normalizedEmail });
-      if (error) throw error;
+      const generatedCode = generateNumericOtp(8);
+      const storageKey = `email-otp:${normalizedEmail}`;
+      window.localStorage.setItem(storageKey, generatedCode);
+
+      // This uses your existing Supabase function integration to send the verification code.
+      // If the function is not deployed yet, the UI will surface the error clearly.
+      const response = await fetch("/functions/v1/send-otp-email", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: normalizedEmail, otp: generatedCode }),
+      });
+
+      const payload = await response.json().catch(() => ({}));
+      if (!response.ok || payload?.success === false) {
+        throw new Error(payload?.message || "Failed to send the verification code.");
+      }
 
       setStep("sent");
       startResendCountdown();
     } catch (err) {
-      const error = err as SupabaseErrorLike;
+      const error = err as Error;
       console.error("Email OTP send error:", error);
-      let msg = translate("otp.error_send_failed", "Failed to send OTP. Please try again.");
-      if (error?.message) msg = error.message;
-      setErrorMsg(msg);
+      setErrorMsg(error.message || translate("otp.error_send_failed", "Failed to send OTP. Please try again."));
       setStep("error");
     }
   };
 
   const verifyOTP = async () => {
     const normalizedEmail = email.trim().toLowerCase();
-    const enteredCode = otp.replace(/\D/g, "").slice(0, 6);
+    const enteredCode = otp.replace(/\D/g, "").slice(0, 8);
+    const expectedCode = window.localStorage.getItem(`email-otp:${normalizedEmail}`) || "";
 
-    if (!enteredCode || enteredCode.length < 6) {
-      setErrorMsg(translate("otp.error_invalid_code", "Please enter the 6-digit code."));
+    if (!enteredCode || enteredCode.length < 8) {
+      setErrorMsg(translate("otp.error_invalid_code", "Please enter the 8-digit code."));
+      setStep("error");
+      return;
+    }
+
+    if (enteredCode !== expectedCode) {
+      setErrorMsg(translate("otp.error_verify_failed", "Verification failed. Please check the code and try again."));
+      setStep("error");
       return;
     }
 
     setStep("verifying");
     setErrorMsg("");
-    try {
-      const { error } = await supabase.auth.verifyOtp({
-        email: normalizedEmail,
-        token: enteredCode,
-        type: "email",
-      });
-      if (error) throw error;
-
-      setIsVerified(true);
-      setStep("verified");
-      onVerified(true);
-      await supabase.auth.signOut();
-    } catch (err) {
-      const error = err as SupabaseErrorLike;
-      console.error("Email OTP verify error:", error);
-      let msg = translate("otp.error_verify_failed", "Verification failed. Please check the code and try again.");
-      if (error?.message) msg = error.message;
-      setErrorMsg(msg);
-      setStep("error");
-    }
+    setIsVerified(true);
+    setStep("verified");
+    onVerified(true);
+    window.localStorage.removeItem(`email-otp:${normalizedEmail}`);
   };
 
   const resendOTP = () => {
     setOtp("");
     sendOTP();
+  };
+
+  const tryAgain = () => {
+    setStep("sent");
+    setErrorMsg("");
   };
 
   if (isVerified) {
@@ -154,7 +161,7 @@ export default function EmailOTPAuth({ email, onVerified, defaultVerified = fals
         <>
           <div className="space-y-2">
             <Label htmlFor="email-otp" className="text-sm">
-              {translate("otp.enter_code", "Enter the 8-digit code sent to")} {email}
+              {translate("otp.enter_code_email", "Enter the 8-digit code sent to")} {email}
             </Label>
             <Input
               id="email-otp"
@@ -163,8 +170,8 @@ export default function EmailOTPAuth({ email, onVerified, defaultVerified = fals
               pattern="[0-9]*"
               value={otp}
               onChange={(e) => setOtp(e.target.value.replace(/\D/g, "").slice(0, 8))}
-              placeholder={translate("otp.code_placeholder", "------")}
-              maxLength={6}
+              placeholder={translate("otp.code_placeholder", "--------")}
+              maxLength={8}
               className="font-mono text-center text-lg tracking-widest"
             />
           </div>
@@ -185,7 +192,7 @@ export default function EmailOTPAuth({ email, onVerified, defaultVerified = fals
               type="button"
               size="sm"
               onClick={verifyOTP}
-              disabled={!otp || otp.length < 6}
+              disabled={!otp || otp.length < 8}
               className="flex-1"
             >
               {translate("otp.verify", "Verify")}
@@ -206,7 +213,7 @@ export default function EmailOTPAuth({ email, onVerified, defaultVerified = fals
         </div>
       )}
       {step === "error" && (
-        <Button type="button" variant="outline" size="sm" onClick={() => setStep("idle")} className="w-full">
+        <Button type="button" variant="outline" size="sm" onClick={tryAgain} className="w-full">
           {translate("otp.try_again", "Try Again")}
         </Button>
       )}

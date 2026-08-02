@@ -25,6 +25,7 @@ export default function Contact() {
   const [captchaInput, setCaptchaInput] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [emailVerified, setEmailVerified] = useState(false);
+  const [submissionSuccess, setSubmissionSuccess] = useState(false);
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -52,7 +53,7 @@ export default function Contact() {
       return;
     }
     setSubmitting(true);
-    const { error } = await supabase.from("contacts").insert({
+    const submissionData = {
       name: safeName,
       contact_number: safePhone,
       email: safeEmail,
@@ -60,13 +61,20 @@ export default function Contact() {
       details: safeDetails,
       phone_verified: false,
       email_verified: true,
-    });
+    };
+    const { error } = await supabase.from("contacts").insert(submissionData);
     setSubmitting(false);
     if (error) { toast.error(error.message); return; }
+
+    supabase.functions.invoke("notify-admin-on-submission", {
+      body: { subject: `New Contact Form Submission: ${safeSubject}`, message: `<p>You have a new submission from the contact form.</p><pre>${JSON.stringify(submissionData, null, 2)}</pre>` },
+    });
+
     toast.success(translate("contact.toast.success", "Message sent! We'll be in touch soon."));
     setForm({ name: "", contact_number: "", email: "", subject: "", details: "" });
     setCaptcha(generateCaptcha()); setCaptchaInput("");
     setEmailVerified(false);
+    setSubmissionSuccess(true);
   };
 
   return (
@@ -101,35 +109,43 @@ export default function Contact() {
           </div>
         </div>
 
-        <form onSubmit={submit} className="space-y-5 bg-card p-6 md:p-8 rounded-2xl shadow-card border">
-          <div><Label>{translate("form.name", "Name")} *</Label><Input required value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} /></div>
-          <div>
-            <Label>{translate("form.phone", "Phone")} *</Label>
-            <PhoneInput required value={form.contact_number} onChange={(v) => setForm({ ...form, contact_number: v })} />
+        {submissionSuccess ? (
+          <div className="text-center p-10 bg-card border rounded-2xl shadow-card">
+            <h2 className="font-display font-bold text-2xl text-gradient mb-3">Thank You!</h2>
+            <p className="text-muted-foreground mb-6">Your message has been sent successfully. We'll be in touch soon.</p>
+            <Button onClick={() => setSubmissionSuccess(false)}>Send Another Message</Button>
           </div>
-          {form.email && (
-            <div className="p-4 border rounded-lg bg-muted/20">
-              <p className="text-sm text-muted-foreground mb-2">
-                Verify your email address using the free Supabase OTP service.
-              </p>
-              <EmailOTPAuth email={sanitizeEmail(form.email)} onVerified={setEmailVerified} />
+        ) : (
+          <form onSubmit={submit} className="space-y-5 bg-card p-6 md:p-8 rounded-2xl shadow-card border">
+            <div><Label>{translate("form.name", "Name")} *</Label><Input required value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} /></div>
+            <div>
+              <Label>{translate("form.phone", "Phone")} *</Label>
+              <PhoneInput required value={form.contact_number} onChange={(v) => setForm({ ...form, contact_number: v })} />
             </div>
-          )}
-          <div>
-            <Label>{translate("form.email", "Email")} *</Label>
-            <Input required type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} />
-          </div>
-          <div><Label>{translate("form.subject", "Subject")} *</Label><Input required value={form.subject} onChange={(e) => setForm({ ...form, subject: e.target.value })} /></div>
-          <div><Label>{translate("form.message", "Message")} *</Label><Textarea required rows={5} value={form.details} onChange={(e) => setForm({ ...form, details: e.target.value })} /></div>
-          <div className="bg-muted/40 p-4 rounded-md flex items-center gap-3">
-            <span className="font-mono font-bold text-lg">{captcha.a} + {captcha.b} = ?</span>
-            <Input value={captchaInput} onChange={(e) => setCaptchaInput(e.target.value)} className="w-24" placeholder={translate("form.captcha_answer", "Answer")} />
-            <Button type="button" variant="ghost" size="sm" onClick={() => { setCaptcha(generateCaptcha()); setCaptchaInput(""); }}>{translate("form.captcha_refresh", "Refresh")}</Button>
-          </div>
-          <Button type="submit" disabled={submitting} className="w-full bg-primary-gradient" size="lg">
-            {submitting && <Loader2 className="h-4 w-4 mr-2 animate-spin" />} {translate("form.send_message", "Send Message")}
-          </Button>
-        </form>
+            <div>
+              <Label>{translate("form.email", "Email")} *</Label>
+              <Input required type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} />
+            </div>
+            {form.email && (
+              <div className="p-4 border rounded-lg bg-muted/20">
+                <p className="text-sm text-muted-foreground mb-2">
+                  Verify your email address using the free Supabase OTP service.
+                </p>
+                <EmailOTPAuth email={sanitizeEmail(form.email)} onVerified={setEmailVerified} />
+              </div>
+            )}
+            <div><Label>{translate("form.subject", "Subject")} *</Label><Input required value={form.subject} onChange={(e) => setForm({ ...form, subject: e.target.value })} /></div>
+            <div><Label>{translate("form.message", "Message")} *</Label><Textarea required rows={5} value={form.details} onChange={(e) => setForm({ ...form, details: e.target.value })} /></div>
+            <div className="bg-muted/40 p-4 rounded-md flex items-center gap-3">
+              <span className="font-mono font-bold text-lg">{captcha.a} + {captcha.b} = ?</span>
+              <Input value={captchaInput} onChange={(e) => setCaptchaInput(e.target.value)} className="w-24" placeholder={translate("form.captcha_answer", "Answer")} />
+              <Button type="button" variant="ghost" size="sm" onClick={() => { setCaptcha(generateCaptcha()); setCaptchaInput(""); }}>{translate("form.captcha_refresh", "Refresh")}</Button>
+            </div>
+            <Button type="submit" disabled={submitting} className="w-full bg-primary-gradient" size="lg">
+              {submitting && <Loader2 className="h-4 w-4 mr-2 animate-spin" />} {translate("form.send_message", "Send Message")}
+            </Button>
+          </form>
+        )}
       </div>
     </Layout>
   );

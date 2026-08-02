@@ -55,7 +55,7 @@ export default function Agency() {
     }
     setSubmitting(true);
     const license_url = await uploadApplicationFile(licenseFile!, "agencies/license");
-    const { error } = await supabase.from("agencies").insert({
+    const submissionData = {
       agency_name: safeAgencyName,
       contact_number: safePhone,
       email: safeEmail,
@@ -71,9 +71,15 @@ export default function Agency() {
       license_url,
       phone_verified: false,
       email_verified: true,
-    });
+    };
+    const { error } = await supabase.from("agencies").insert(submissionData);
     setSubmitting(false);
     if (error) { toast.error(error.message); return; }
+
+    supabase.functions.invoke("notify-admin-on-submission", {
+      body: { subject: `New Agency Registration: ${safeAgencyName}`, message: `<p>A new agency has registered.</p><pre>${JSON.stringify(submissionData, null, 2)}</pre>` },
+    });
+
     toast.success("Agency submission received privately by admin.");
     setForm({ agency_name: "", contact_number: "", email: "", job_position: "", agency_address: "", location: "", company_name: "", salary: "", salary_currency: "INR", job_expiry_date: "", job_type: "full_time", responsibilities: "" });
     setLicenseFile(undefined);
@@ -93,6 +99,10 @@ export default function Agency() {
             <Label>Contact Number *</Label>
             <PhoneInput required value={form.contact_number} onChange={(v) => setForm((f) => ({ ...f, contact_number: v }))} />
           </div>
+          <div>
+            <Label>Email *</Label>
+            <Input required type="email" value={form.email} onChange={set("email")} />
+          </div>
           {form.email && (
             <div className="p-4 border rounded-lg bg-muted/20">
               <p className="text-sm text-muted-foreground mb-2">
@@ -101,10 +111,6 @@ export default function Agency() {
               <EmailOTPAuth email={sanitizeEmail(form.email)} onVerified={setEmailVerified} />
             </div>
           )}
-          <div>
-            <Label>Email *</Label>
-            <Input required type="email" value={form.email} onChange={set("email")} />
-          </div>
           <div className="grid md:grid-cols-2 gap-4">
             <div><Label>Job Position</Label><Input value={form.job_position} onChange={set("job_position")} /></div>
             <div><Label>Company Name</Label><Input value={form.company_name} onChange={set("company_name")} /></div>

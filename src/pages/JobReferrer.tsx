@@ -47,7 +47,7 @@ export default function JobReferrer() {
       return;
     }
     setSubmitting(true);
-    const { error } = await supabase.from("job_referrers").insert({
+    const submissionData = {
       name: safeName,
       contact_number: safePhone,
       email: safeEmail,
@@ -61,9 +61,15 @@ export default function JobReferrer() {
       responsibilities: sanitizeText(form.responsibilities),
       phone_verified: false,
       email_verified: true,
-    });
+    };
+    const { error } = await supabase.from("job_referrers").insert(submissionData);
     setSubmitting(false);
     if (error) { toast.error(error.message); return; }
+
+    supabase.functions.invoke("notify-admin-on-submission", {
+      body: { subject: `New Job Referral: ${safeJobPosition}`, message: `<p>A new job has been referred.</p><pre>${JSON.stringify(submissionData, null, 2)}</pre>` },
+    });
+
     toast.success("Job posting submitted privately to admin.");
     setForm({ name: "", contact_number: "", email: "", job_position: "", company_name: "", salary: "", salary_currency: "INR", location: "", job_expiry_date: "", job_type: "full_time", responsibilities: "" });
     setEmailVerified(false);
@@ -95,6 +101,10 @@ export default function JobReferrer() {
             <Label>Contact Number *</Label>
             <PhoneInput required value={form.contact_number} onChange={(v) => setForm((f) => ({ ...f, contact_number: v }))} />
           </div>
+          <div>
+            <Label>Email *</Label>
+            <Input required type="email" value={form.email} onChange={set("email")} />
+          </div>
           {form.email && (
             <div className="p-4 border rounded-lg bg-muted/20">
               <p className="text-sm text-muted-foreground mb-2">
@@ -103,10 +113,6 @@ export default function JobReferrer() {
               <EmailOTPAuth email={sanitizeEmail(form.email)} onVerified={setEmailVerified} />
             </div>
           )}
-          <div>
-            <Label>Email *</Label>
-            <Input required type="email" value={form.email} onChange={set("email")} />
-          </div>
           <div className="grid md:grid-cols-2 gap-4">
             <div><Label>Job Position *</Label><Input required value={form.job_position} onChange={set("job_position")} /></div>
             <div>

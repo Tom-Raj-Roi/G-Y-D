@@ -11,6 +11,7 @@ import { uploadApplicationFile } from "@/lib/uploads";
 import { toast } from "sonner";
 import { Loader2, ShieldCheck } from "lucide-react";
 import PhoneInput from "@/components/PhoneInput";
+import PhoneOTPAuth from "@/components/PhoneOTPAuth";
 import EmailOTPAuth from "@/components/EmailOTPAuth";
 import CurrencyInput from "@/components/CurrencyInput";
 

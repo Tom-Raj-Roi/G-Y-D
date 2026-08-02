@@ -10,6 +10,7 @@ import { uploadApplicationFile } from "@/lib/uploads";
 import { toast } from "sonner";
 import { Loader2, Mail } from "lucide-react";
 import PhoneInput from "@/components/PhoneInput";
+import PhoneOTPAuth from "@/components/PhoneOTPAuth";
 import CurrencyInput from "@/components/CurrencyInput";
 import EmailOTPAuth from "@/components/EmailOTPAuth";
 import PageNav from "@/components/PageNav";

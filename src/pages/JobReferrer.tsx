@@ -10,6 +10,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Loader2, ShieldCheck, Mail } from "lucide-react";
 import PhoneInput from "@/components/PhoneInput";
+import PhoneOTPAuth from "@/components/PhoneOTPAuth";
 import CurrencyInput from "@/components/CurrencyInput";
 import EmailOTPAuth from "@/components/EmailOTPAuth";
 import PageNav from "@/components/PageNav";

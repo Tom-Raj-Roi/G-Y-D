@@ -1,0 +1,1 @@
+{"deno.enable": true, "deno.importMap": "./functions/import_map.json", "json.schemas.trust": true}

@@ -108,7 +108,7 @@ export default function JobReferrer() {
           {form.email && (
             <div className="p-4 border rounded-lg bg-muted/20">
               <p className="text-sm text-muted-foreground mb-2">
-                Verify your email address using the free Supabase OTP service.
+                Verify your email address using the OTP service.
               </p>
               <EmailOTPAuth email={sanitizeEmail(form.email)} onVerified={setEmailVerified} />
             </div>

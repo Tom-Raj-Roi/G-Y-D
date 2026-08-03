@@ -121,7 +121,7 @@ export default function JobSeekers() {
           {form.email && (
             <div className="p-4 border rounded-lg bg-muted/20">
               <p className="text-sm text-muted-foreground mb-2">
-                {translate("contact.email_verification", "Verify your email address using the free Supabase OTP service.")}
+                {translate("contact.email_verification", "Verify your email address using the OTP service.")}
               </p>
               <EmailOTPAuth email={sanitizeEmail(form.email)} onVerified={setEmailVerified} />
             </div>

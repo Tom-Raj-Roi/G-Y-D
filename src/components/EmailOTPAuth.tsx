@@ -5,15 +5,12 @@ import { Label } from "@/components/ui/label";
 import { Loader2, CheckCircle, AlertCircle } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { supabase } from "@/integrations/supabase/client";
-import { generateNumericOtp } from "@/lib/otp";
 
 type EmailOTPAuthProps = {
   email: string;
   onVerified: (verified: boolean) => void;
   defaultVerified?: boolean;
 };
-
-type SupabaseErrorLike = { code?: string; message?: string; msg?: string };
 
 export default function EmailOTPAuth({ email, onVerified, defaultVerified = false }: EmailOTPAuthProps) {
   const { translate } = useLanguage();
@@ -74,22 +71,13 @@ export default function EmailOTPAuth({ email, onVerified, defaultVerified = fals
     setErrorMsg("");
 
     try {
-      const generatedCode = generateNumericOtp(8);
-      const storageKey = `email-otp:${normalizedEmail}`;
-      window.localStorage.setItem(storageKey, generatedCode);
-
-      const { data, error } = await supabase.functions.invoke("send-otp-email", {
-        body: JSON.stringify({ email: normalizedEmail, otp: generatedCode }),
-        headers: { "Content-Type": "application/json" },
+      const { error } = await supabase.auth.signInWithOtp({
+        email: normalizedEmail,
+        options: { shouldCreateUser: false },
       });
 
       if (error) {
         throw error;
-      }
-
-      const payload = typeof data === "string" ? JSON.parse(data) : data;
-      if (!payload || payload?.success === false) {
-        throw new Error(payload?.message || "Failed to send the verification code.");
       }
 
       setStep("sent");
@@ -104,27 +92,27 @@ export default function EmailOTPAuth({ email, onVerified, defaultVerified = fals
 
   const verifyOTP = async () => {
     const normalizedEmail = email.trim().toLowerCase();
-    const enteredCode = otp.replace(/\D/g, "").slice(0, 8);
-    const expectedCode = window.localStorage.getItem(`email-otp:${normalizedEmail}`) || "";
+    const enteredCode = otp.trim();
 
-    if (!enteredCode || enteredCode.length < 8) {
-      setErrorMsg(translate("otp.error_invalid_code", "Please enter the 8-digit code."));
-      setStep("error");
-      return;
-    }
-
-    if (enteredCode !== expectedCode) {
-      setErrorMsg(translate("otp.error_verify_failed", "Verification failed. Please check the code and try again."));
+    if (!enteredCode) {
+      setErrorMsg(translate("otp.error_invalid_code", "Please enter the verification code."));
       setStep("error");
       return;
     }
 
     setStep("verifying");
     setErrorMsg("");
-    setIsVerified(true);
-    setStep("verified");
-    onVerified(true);
-    window.localStorage.removeItem(`email-otp:${normalizedEmail}`);
+
+    const { error } = await supabase.auth.verifyOtp({ email: normalizedEmail, token: enteredCode, type: "email" });
+
+    if (error) {
+      setErrorMsg(error.message || translate("otp.error_verify_failed", "Verification failed. Please check the code and try again."));
+      setStep("error");
+    } else {
+      setIsVerified(true);
+      setStep("verified");
+      onVerified(true);
+    }
   };
 
   const resendOTP = () => {
@@ -171,9 +159,9 @@ export default function EmailOTPAuth({ email, onVerified, defaultVerified = fals
               inputMode="numeric"
               pattern="[0-9]*"
               value={otp}
-              onChange={(e) => setOtp(e.target.value.replace(/\D/g, "").slice(0, 8))}
-              placeholder={translate("otp.code_placeholder", "--------")}
-              maxLength={8}
+              onChange={(e) => setOtp(e.target.value.replace(/\D/g, ""))}
+              placeholder={translate("otp.code_placeholder", "123456")}
+              maxLength={6}
               className="font-mono text-center text-lg tracking-widest"
             />
           </div>
@@ -194,7 +182,7 @@ export default function EmailOTPAuth({ email, onVerified, defaultVerified = fals
               type="button"
               size="sm"
               onClick={verifyOTP}
-              disabled={!otp || otp.length < 8}
+              disabled={!otp}
               className="flex-1"
             >
               {translate("otp.verify", "Verify")}

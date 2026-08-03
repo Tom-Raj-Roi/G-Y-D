@@ -78,18 +78,17 @@ export default function EmailOTPAuth({ email, onVerified, defaultVerified = fals
       const storageKey = `email-otp:${normalizedEmail}`;
       window.localStorage.setItem(storageKey, generatedCode);
 
-      const functionUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/send-otp-email`;
-      const response = await fetch(functionUrl, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
-        },
+      const { data, error } = await supabase.functions.invoke("send-otp-email", {
         body: JSON.stringify({ email: normalizedEmail, otp: generatedCode }),
+        headers: { "Content-Type": "application/json" },
       });
 
-      const payload = await response.json().catch(() => ({}));
-      if (!response.ok || payload?.success === false) {
+      if (error) {
+        throw error;
+      }
+
+      const payload = typeof data === "string" ? JSON.parse(data) : data;
+      if (!payload || payload?.success === false) {
         throw new Error(payload?.message || "Failed to send the verification code.");
       }
 

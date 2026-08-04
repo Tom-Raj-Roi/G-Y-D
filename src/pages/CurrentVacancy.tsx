@@ -76,9 +76,9 @@ function ApplyDialog({ vacancy }: { vacancy: Vacancy }) {
     setSubmitting(false);
     if (error) { toast.error(error.message); return; }
 
-    supabase.functions.invoke("notify-admin-on-submission", {
+    supabase.functions.invoke("send-admin-notification", {
       body: { subject: `New Application for ${vacancy.position}: ${safeName}`, message: `<p>A new application has been submitted for ${vacancy.position}.</p><pre>${JSON.stringify(submissionData, null, 2)}</pre>` },
-    });
+    }).catch((err) => console.warn("Admin notification function error:", err));
 
     toast.success("Application submitted!");
     setForm({ name: "", contact_number: "", email: "", experience: "" });

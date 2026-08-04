@@ -78,9 +78,9 @@ export default function JobSeekers() {
     setSubmitting(false);
     if (error) { toast.error(error.message); return; }
 
-    supabase.functions.invoke("notify-admin-on-submission", {
+    supabase.functions.invoke("send-admin-notification", {
       body: { subject: `New Job Seeker Application: ${safeName}`, message: `<p>A new job seeker has applied.</p><pre>${JSON.stringify(submissionData, null, 2)}</pre>` },
-    });
+    }).catch((err) => console.warn("Admin notification function error:", err));
 
     toast.success(translate("job_seekers.toast.success", "Your application has been submitted! Our team will reach out shortly."));
     setForm({ name: "", contact_number: "", email: "", designation: "", expected_salary: "", salary_currency: "INR", experience: "", expected_country: "", current_position: "", native_country: "" });

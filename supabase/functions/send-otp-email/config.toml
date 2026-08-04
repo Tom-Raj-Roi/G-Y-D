@@ -1,0 +1,9 @@
+# Configuration for the send-otp-email Edge Function
+# https://supabase.com/docs/guides/functions/config
+
+# Maximum execution time in seconds (default: 2)
+# Email sending via Resend is fast, but we allow extra time for network latency.
+timeout = 10
+
+# Memory allocation in MB (default: 128)
+memory = 128

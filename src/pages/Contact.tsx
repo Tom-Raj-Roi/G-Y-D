@@ -66,9 +66,9 @@ export default function Contact() {
     setSubmitting(false);
     if (error) { toast.error(error.message); return; }
 
-    supabase.functions.invoke("notify-admin-on-submission", {
+    supabase.functions.invoke("send-admin-notification", {
       body: { subject: `New Contact Form Submission: ${safeSubject}`, message: `<p>You have a new submission from the contact form.</p><pre>${JSON.stringify(submissionData, null, 2)}</pre>` },
-    });
+    }).catch((err) => console.warn("Admin notification function error:", err));
 
     toast.success(translate("contact.toast.success", "Message sent! We'll be in touch soon."));
     setForm({ name: "", contact_number: "", email: "", subject: "", details: "" });

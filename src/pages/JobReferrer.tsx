@@ -66,9 +66,9 @@ export default function JobReferrer() {
     setSubmitting(false);
     if (error) { toast.error(error.message); return; }
 
-    supabase.functions.invoke("notify-admin-on-submission", {
+    supabase.functions.invoke("send-admin-notification", {
       body: { subject: `New Job Referral: ${safeJobPosition}`, message: `<p>A new job has been referred.</p><pre>${JSON.stringify(submissionData, null, 2)}</pre>` },
-    });
+    }).catch((err) => console.warn("Admin notification function error:", err));
 
     toast.success("Job posting submitted privately to admin.");
     setForm({ name: "", contact_number: "", email: "", job_position: "", company_name: "", salary: "", salary_currency: "INR", location: "", job_expiry_date: "", job_type: "full_time", responsibilities: "" });

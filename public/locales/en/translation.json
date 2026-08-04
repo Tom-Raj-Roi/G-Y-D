@@ -58,6 +58,7 @@
     "phone_verified": "Phone number verified",
     "try_again": "Try Again",
     "error_invalid_phone": "Please enter a valid phone number.",
+    "error_invalid_email": "Please enter a valid email address.",
     "error_missing_phone": "Phone number is required.",
     "error_send_failed": "Failed to send OTP. Please try again.",
     "error_too_many_requests": "Too many requests. Please wait a few minutes and try again.",
@@ -69,7 +70,10 @@
     "error_firebase_not_configured": "Firebase is not configured. Phone verification is disabled.",
     "skip_verification": "Skip Phone Verification",
     "email_not_confirmed": "Please verify your email address before signing in. Check your inbox for a confirmation link.",
-    "signin_error": "An unexpected error occurred during sign-in. Please try again."
+    "signin_error": "An unexpected error occurred during sign-in. Please try again.",
+    "edge_function_error": "Unable to connect to the email verification service. Please make sure the 'send-otp-email' Edge Function is deployed on Supabase.",
+    "edge_function_http_error": "The email verification service returned an error. Please try again later or contact support.",
+    "edge_function_not_configured": "The email verification service is not fully configured. Please contact the site administrator."
   },
   "header": {
     "send_cv_here": "(send CV here)",

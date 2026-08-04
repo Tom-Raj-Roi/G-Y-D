@@ -1,4 +1,16 @@
-{
+{  "fmt": {
+    "files": {
+      "include": ["functions/", "tests/"],
+      "exclude": []
+    },
+    "options": {
+      "useTabs": false,
+      "lineWidth": 80,
+      "indentWidth": 2,
+      "singleQuote": true,
+      "proseWrap": "always"
+    }
+  },
   "importMap": "./import_map.json",
   "compilerOptions": {
     "lib": ["dom", "deno.ns"]

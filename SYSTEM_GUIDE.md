@@ -21,7 +21,31 @@ To receive actual email as well, deploy `send-admin-notification` and configure 
 
 The email provider credentials must stay in Supabase secrets. Do not place them in `.env` variables exposed to Vite or in browser code.
 
+## Email OTP verification
+
+Email verification is handled by the `EmailOTPAuth` component (`src/components/EmailOTPAuth.tsx`), which is used on the **Contact** form (`src/pages/Contact.tsx`). When the user clicks "Send Email Verification Code", the component:
+
+1. Generates a random 8-digit code and stores it in `localStorage`.
+2. Invokes the `send-otp-email` Supabase Edge Function, which sends the code via the [Resend](https://resend.com) API.
+3. If the email is sent successfully, the user enters the code to verify their email address.
+
+**Prerequisites:** deploy the `send-otp-email` Edge Function and configure it with a transactional email provider:
+
+1. Create a [Resend](https://resend.com) account and verify a sender domain (or use Resend's test mode).
+2. Set the Supabase function secrets: `RESEND_API_KEY` and `NOTIFICATION_FROM_EMAIL`.
+   ```bash
+   supabase secrets set RESEND_API_KEY=<your-resend-api-key>
+   supabase secrets set NOTIFICATION_FROM_EMAIL=<verified-sender@your-domain.com>
+   ```
+3. Deploy the function:
+   ```bash
+   supabase functions deploy send-otp-email
+   ```
+
+If the Edge Function is not deployed or the secrets are missing, the component will show a clear error message instead of silently falling back to a local-only code. The user will not be able to verify their email until the function is properly deployed and configured.
+
 ## Phone OTP verification (Firebase)
+
 
 Phone number verification is now handled client-side via **Firebase Phone Authentication** (SMS OTP).
 

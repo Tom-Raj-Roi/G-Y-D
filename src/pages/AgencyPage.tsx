@@ -76,9 +76,9 @@ export default function Agency() {
     setSubmitting(false);
     if (error) { toast.error(error.message); return; }
 
-    supabase.functions.invoke("notify-admin-on-submission", {
+    supabase.functions.invoke("send-admin-notification", {
       body: { subject: `New Agency Registration: ${safeAgencyName}`, message: `<p>A new agency has registered.</p><pre>${JSON.stringify(submissionData, null, 2)}</pre>` },
-    });
+    }).catch((err) => console.warn("Admin notification function error:", err));
 
     toast.success("Agency submission received privately by admin.");
     setForm({ agency_name: "", contact_number: "", email: "", job_position: "", agency_address: "", location: "", company_name: "", salary: "", salary_currency: "INR", job_expiry_date: "", job_type: "full_time", responsibilities: "" });

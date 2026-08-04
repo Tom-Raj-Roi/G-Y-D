@@ -5,6 +5,8 @@ import { Label } from "@/components/ui/label";
 import { Loader2, CheckCircle, AlertCircle } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { supabase } from "@/integrations/supabase/client";
+import { generateNumericOtp } from "@/lib/otp";
+import type { FunctionsFetchError, FunctionsHttpError, FunctionsRelayError } from "@supabase/supabase-js";
 
 type EmailOTPAuthProps = {
   email: string;
@@ -21,7 +23,6 @@ export default function EmailOTPAuth({ email, onVerified, defaultVerified = fals
   const resendTimeoutRef = useRef<number | null>(null);
   const [resendCountdown, setResendCountdown] = useState(0);
 
-  // Reset state whenever the email changes.
   useEffect(() => {
     setStep("idle");
     setIsVerified(false);
@@ -35,7 +36,6 @@ export default function EmailOTPAuth({ email, onVerified, defaultVerified = fals
     onVerified(false);
   }, [email, onVerified]);
 
-  // Cleanup countdown on unmount.
   useEffect(() => {
     return () => {
       if (resendTimeoutRef.current) {
@@ -67,62 +67,112 @@ export default function EmailOTPAuth({ email, onVerified, defaultVerified = fals
       setStep("error");
       return;
     }
+
     setStep("sending");
     setErrorMsg("");
 
     try {
-      const { error } = await supabase.auth.signInWithOtp({
-        email: normalizedEmail,
-        options: { shouldCreateUser: false },
+      const generatedCode = generateNumericOtp(8);
+      const storageKey = `email-otp:${normalizedEmail}`;
+      window.localStorage.setItem(storageKey, generatedCode);
+
+      const { data, error } = await supabase.functions.invoke("send-otp-email", {
+        body: { email: normalizedEmail, otp: generatedCode },
       });
 
       if (error) {
         throw error;
       }
 
+      const payload = typeof data === "string" ? JSON.parse(data) : data;
+      if (!payload || payload.success === false) {
+        throw new Error(payload?.message ?? "Failed to send the verification code.");
+      }
+
       setStep("sent");
       startResendCountdown();
     } catch (err) {
-      const error = err as Error;
+      const error = err as Error & { name?: string };
       console.error("Email OTP send error:", error);
-      setErrorMsg(error.message || translate("otp.error_send_failed", "Failed to send OTP. Please try again."));
+
+      // Handle specific Supabase Edge Function error types
+      const isFetchError =
+        error?.name === "FunctionsFetchError" ||
+        error.message?.includes("Failed to send a request to the Edge Function");
+      const isHttpError =
+        error?.name === "FunctionsHttpError" ||
+        error.message?.includes("Edge Function returned a non-2xx status code");
+      const isRelayError =
+        error?.name === "FunctionsRelayError" ||
+        error.message?.includes("Relay Error invoking the Edge Function");
+
+      let userMsg: string;
+
+      if (isFetchError) {
+        // The Edge Function is not deployed or unreachable.
+        // Do NOT silently fall back to local-only OTP — the user
+        // would think the email was sent when it was not.
+        // Instead, show a clear error so the user knows the
+        // email service is not available.
+        userMsg = translate(
+          "otp.edge_function_error",
+          "Unable to connect to the email verification service. The verification code was NOT sent. Please make sure the 'send-otp-email' Edge Function is deployed on Supabase and that RESEND_API_KEY and NOTIFICATION_FROM_EMAIL secrets are configured."
+        );
+      } else if (isHttpError) {
+        // The function is deployed but returned an error (e.g. missing
+        // RESEND_API_KEY / NOTIFICATION_FROM_EMAIL env vars, or Resend
+        // API rejected the request).
+        userMsg = translate(
+          "otp.edge_function_http_error",
+          "The email verification service returned an error. The verification code was NOT sent. Please try again later or contact support."
+        );
+      } else if (isRelayError) {
+        userMsg = translate(
+          "otp.edge_function_error",
+          "Unable to connect to the email verification service. The verification code was NOT sent. Please make sure the 'send-otp-email' Edge Function is deployed on Supabase."
+        );
+      } else {
+        userMsg =
+          error.message ||
+          translate("otp.error_send_failed", "Failed to send OTP. Please try again.");
+      }
+
+      // Clean up the locally-stored OTP since the email was not sent.
+      window.localStorage.removeItem(`email-otp:${normalizedEmail}`);
+
+      setErrorMsg(userMsg);
       setStep("error");
     }
   };
 
   const verifyOTP = async () => {
     const normalizedEmail = email.trim().toLowerCase();
-    const enteredCode = otp.trim();
+    const enteredCode = otp.replace(/\D/g, "");
+    const expectedCode = window.localStorage.getItem(`email-otp:${normalizedEmail}`) ?? "";
 
-    if (!enteredCode) {
-      setErrorMsg(translate("otp.error_invalid_code", "Please enter the verification code."));
+    if (!enteredCode || enteredCode.length < 8) {
+      setErrorMsg(translate("otp.error_invalid_code", "Please enter the 8-digit code."));
+      setStep("error");
+      return;
+    }
+
+    if (enteredCode !== expectedCode) {
+      setErrorMsg(translate("otp.error_verify_failed", "Verification failed. Please check the code and try again."));
       setStep("error");
       return;
     }
 
     setStep("verifying");
     setErrorMsg("");
-
-    const { error } = await supabase.auth.verifyOtp({ email: normalizedEmail, token: enteredCode, type: "email" });
-
-    if (error) {
-      setErrorMsg(error.message || translate("otp.error_verify_failed", "Verification failed. Please check the code and try again."));
-      setStep("error");
-    } else {
-      setIsVerified(true);
-      setStep("verified");
-      onVerified(true);
-    }
+    setIsVerified(true);
+    setStep("verified");
+    onVerified(true);
+    window.localStorage.removeItem(`email-otp:${normalizedEmail}`);
   };
 
   const resendOTP = () => {
     setOtp("");
     sendOTP();
-  };
-
-  const tryAgain = () => {
-    setStep("sent");
-    setErrorMsg("");
   };
 
   if (isVerified) {
@@ -159,9 +209,9 @@ export default function EmailOTPAuth({ email, onVerified, defaultVerified = fals
               inputMode="numeric"
               pattern="[0-9]*"
               value={otp}
-              onChange={(e) => setOtp(e.target.value.replace(/\D/g, ""))}
-              placeholder={translate("otp.code_placeholder", "123456")}
-              maxLength={6}
+              onChange={(e) => setOtp(e.target.value.replace(/\D/g, "").slice(0, 8))}
+              placeholder={translate("otp.code_placeholder", "--------")}
+              maxLength={8}
               className="font-mono text-center text-lg tracking-widest"
             />
           </div>
@@ -174,7 +224,7 @@ export default function EmailOTPAuth({ email, onVerified, defaultVerified = fals
               disabled={resendCountdown > 0}
               className="flex-1"
             >
-            {resendCountdown > 0
+              {resendCountdown > 0
                 ? `${translate("otp.resend", "Resend")} (${resendCountdown}s)`
                 : translate("otp.resend", "Resend")}
             </Button>
@@ -182,7 +232,7 @@ export default function EmailOTPAuth({ email, onVerified, defaultVerified = fals
               type="button"
               size="sm"
               onClick={verifyOTP}
-              disabled={!otp}
+              disabled={!otp || otp.length < 8}
               className="flex-1"
             >
               {translate("otp.verify", "Verify")}
@@ -201,11 +251,6 @@ export default function EmailOTPAuth({ email, onVerified, defaultVerified = fals
           <AlertCircle className="h-5 w-5 flex-shrink-0 mt-0.5" />
           <span className="text-sm">{errorMsg}</span>
         </div>
-      )}
-      {step === "error" && (
-        <Button type="button" variant="outline" size="sm" onClick={tryAgain} className="w-full">
-          {translate("otp.try_again", "Try Again")}
-        </Button>
       )}
     </div>
   );

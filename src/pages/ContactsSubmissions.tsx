@@ -5,13 +5,15 @@ import { Loader2 } from "lucide-react";
 
 // Define a type for the contact submission for type safety
 type ContactSubmission = {
-  id: number;
+  id: string;
   created_at: string;
   name: string | null;
   email: string | null;
   contact_number: string | null;
   subject: string | null;
   details: string | null;
+  email_verified: boolean | null;
+  phone_verified: boolean | null;
 };
 
 export default function ContactsSubmissions() {

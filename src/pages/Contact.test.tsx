@@ -24,9 +24,9 @@ vi.mock("@/components/PhoneInput", () => ({
   ),
 }));
 
-vi.mock("@/components/PhoneOTPAuth", () => ({
-  default: ({ phoneNumber }: { phoneNumber: string }) => (
-    <div data-testid="phone-otp-auth">{phoneNumber}</div>
+vi.mock("@/components/EmailOTPAuth", () => ({
+  default: ({ email }: { email: string }) => (
+    <div data-testid="email-otp-auth">{email}</div>
   ),
 }));
 
@@ -53,14 +53,12 @@ describe("Contact page", () => {
     container.remove();
   });
 
-  it("renders the OTP verification UI for an international phone number", () => {
+  it("renders contact form properly", () => {
     act(() => {
       root.render(<Contact />);
     });
 
     const input = container.querySelector("[data-testid='phone-input']") as HTMLInputElement;
     expect(input).toBeInTheDocument();
-
-    expect(container.textContent).not.toContain("+919876543210");
   });
 });

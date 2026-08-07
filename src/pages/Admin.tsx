@@ -17,11 +17,11 @@ import { INDUSTRIES } from "@/lib/dial-codes";
 import { CURRENCIES, findCurrencyByCode } from "@/lib/currencies";
 import { toast } from "sonner";
 import CurrencyInput from "@/components/CurrencyInput";
-import { useTranslation } from "react-i18next";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 function FileLink({ bucket, path, label }: { bucket: string; path: string | null; label: string }) {
   if (!path) return <span className="text-xs text-muted-foreground">—</span>;
-  const { t } = useTranslation();
+  const { translate: t } = useLanguage();
   const download = async () => {
     const { data } = await supabase.storage.from(bucket).createSignedUrl(path, 3600);
     if (data?.signedUrl) window.open(data.signedUrl, "_blank");
@@ -32,7 +32,7 @@ function FileLink({ bucket, path, label }: { bucket: string; path: string | null
 function SubmissionsTable({ table, columns, fileFields = [] }: { table: string; columns: { key: string; label: string }[]; fileFields?: { key: string; bucket: string; label: string }[]; }) {
   const [rows, setRows] = useState<Record<string, unknown>[]>([]);
   const [loading, setLoading] = useState(true);
-  const { t } = useTranslation();
+  const { translate: t } = useLanguage();
   const load = useCallback(async () => {
     setLoading(true);
     // @ts-expect-error dynamic table
@@ -86,7 +86,7 @@ function VacancyManager() {
     job_type: "full_time", responsibilities: "", industry: "", is_international: false, active: true,
   });
   const [editing, setEditing] = useState<string | null>(null);
-  const { t } = useTranslation();
+  const { translate: t } = useLanguage();
 
   const load = useCallback(async () => {
     const { data, error } = await supabase.from("vacancies").select("*").order("created_at", { ascending: false });
@@ -177,7 +177,7 @@ function CustomPagesManager() {
     alignment: "left", max_width: "max-w-4xl", body_size: "base", hero_image_url: "", show_hero: true,
   });
   const [editing, setEditing] = useState<string | null>(null);
-  const { t } = useTranslation();
+  const { translate: t } = useLanguage();
 
   const load = useCallback(async () => {
     const { data, error } = await supabase.from("custom_pages").select("*").order("position");
@@ -321,7 +321,7 @@ type HomeSection = {
 function HomeContentManager() {
   const [sections, setSections] = useState<HomeSection[]>([]);
   const [saving, setSaving] = useState<string | null>(null);
-  const { t } = useTranslation();
+  const { translate: t } = useLanguage();
 
   const load = useCallback(async () => {
     const { data, error } = await supabase.from("site_sections").select("*").order("position");
@@ -373,7 +373,7 @@ type AdminNotification = {
 function NotificationsManager() {
   const [items, setItems] = useState<AdminNotification[]>([]);
   const [loading, setLoading] = useState(true);
-  const { t } = useTranslation();
+  const { translate: t } = useLanguage();
   const load = useCallback(async () => {
     setLoading(true);
     const { data, error } = await supabase.from("admin_notifications").select("*").order("created_at", { ascending: false });
@@ -397,7 +397,7 @@ function NotificationsManager() {
 export default function Admin() {
   const { user, isAdmin, loading } = useAuth();
   const [hasAdmins, setHasAdmins] = useState<boolean | null>(null);
-  const { t } = useTranslation();
+  const { translate: t } = useLanguage();
   const [isCheckingAdmin, setIsCheckingAdmin] = useState(true);
 
   useEffect(() => {

@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef } from "react";
-import { useLanguage } from "@/contexts/LanguageContext";
+import { LANGUAGES, useLanguage } from "@/contexts/LanguageContext";
 import { X } from "lucide-react";
 
 const GOOGLE_TRANSLATE_SCRIPT_ID = "google-translate-script";
@@ -16,7 +16,6 @@ declare global {
               layout?: any;
               autoDisplay?: boolean;
               includedLanguages?: string;
-              excludedLanguages?: string;
             },
             elementId: string
           ): void;
@@ -29,73 +28,74 @@ declare global {
   }
 }
 
-/**
- * GoogleTranslate
- *
- * Fixes the broken translation by:
- *  1. Loading the Google Translate Element widget (which provides
- *     automatic language detection + machine translation for every
- *     word on the page, including numbers and form fields).
- *  2. Auto-detecting the visitor's browser language and, when it
- *     differs from the page language, showing a one-time popup that
- *     offers to translate the page.
- *  3. Setting `autoDisplay: true` so that ALL text nodes — including
- *     form labels, placeholders, and numeric values — are translated.
- *  4. Integrating with the existing i18next LanguageContext so the
- *     language dropdown in the Header stays in sync.
- */
 export default function GoogleTranslate() {
   const { lang, setLang } = useLanguage();
   const [showPopup, setShowPopup] = useState(false);
   const popupShown = useRef(false);
 
-  // ── Load the Google Translate widget script ───────────────────────
   useEffect(() => {
-    if (document.getElementById(GOOGLE_TRANSLATE_SCRIPT_ID)) return;
+    // Inject CSS to clean up Google Translate top frame and banners
+    const styleId = "google-translate-custom-styles";
+    if (!document.getElementById(styleId)) {
+      const style = document.createElement("style");
+      style.id = styleId;
+      style.innerHTML = `
+        .goog-te-banner-frame { display: none !important; }
+        .goog-te-balloon-frame { display: none !important; }
+        body { top: 0px !important; position: static !important; }
+        #google_translate_element select { display: none !important; }
+        .goog-te-gadget { font-size: 0px !important; }
+        .goog-text-highlight { background-color: transparent !important; box-shadow: none !important; }
+      `;
+      document.head.appendChild(style);
+    }
 
-    window.googleTranslateElementInit = () => {
-      new window.google.translate.TranslateElement(
-        {
-          pageLanguage: "en",
-          layout: window.google.translate.TranslateElement.InlineLayout.SIMPLE,
-          autoDisplay: true,
-          includedLanguages: "en,es,fr,de,it,pt,la,hi,ta,te,ml,kn,bn,ur,ar,fa,tr,ru,zh,ja,ko,th,vi,id,ms,tl,sw,nl,pl,el",
-        },
-        "google_translate_element"
-      );
-    };
+    if (!document.getElementById(GOOGLE_TRANSLATE_SCRIPT_ID)) {
+      window.googleTranslateElementInit = () => {
+        if (window.google?.translate?.TranslateElement) {
+          const codes = LANGUAGES.map((l) => l.code).join(",");
+          new window.google.translate.TranslateElement(
+            {
+              pageLanguage: "en",
+              layout: window.google.translate.TranslateElement.InlineLayout.SIMPLE,
+              autoDisplay: true,
+              includedLanguages: codes,
+            },
+            "google_translate_element"
+          );
 
-    const script = document.createElement("script");
-    script.id = GOOGLE_TRANSLATE_SCRIPT_ID;
-    script.src =
-      "https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit";
-    script.async = true;
-    document.body.appendChild(script);
+          // Apply selected language after widget init
+          if (lang && lang !== "en") {
+            setTimeout(() => {
+              const select = document.querySelector<HTMLSelectElement>(".goog-te-combo");
+              if (select) {
+                select.value = lang;
+                select.dispatchEvent(new Event("change"));
+              }
+            }, 500);
+          }
+        }
+      };
 
-    return () => {
-      delete window.googleTranslateElementInit;
-    };
-  }, []);
+      const script = document.createElement("script");
+      script.id = GOOGLE_TRANSLATE_SCRIPT_ID;
+      script.src = "https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit";
+      script.async = true;
+      document.body.appendChild(script);
+    }
+  }, [lang]);
 
-  // ── Auto-detect browser language & show popup on first visit ──────
   useEffect(() => {
     if (popupShown.current) return;
     popupShown.current = true;
 
-    const savedLang = localStorage.getItem("i18nextLng");
-    if (savedLang && savedLang !== "en") {
-      setLang(savedLang);
-      return;
-    }
+    const savedLang = localStorage.getItem("app_lang");
+    if (savedLang) return;
 
     const browserLang = navigator.language?.split("-")[0] || "en";
-    const supported = [
-      "en", "es", "fr", "de", "it", "pt", "la", "hi", "ta", "te",
-      "ml", "kn", "bn", "ur", "ar", "fa", "tr", "ru", "zh", "ja",
-      "ko", "th", "vi", "id", "ms", "tl", "sw", "nl", "pl", "el",
-    ];
+    const isSupported = LANGUAGES.some((l) => l.code === browserLang);
 
-    if (browserLang !== "en" && supported.includes(browserLang)) {
+    if (browserLang !== "en" && isSupported) {
       const timer = setTimeout(() => setShowPopup(true), 1500);
       return () => clearTimeout(timer);
     }
@@ -109,30 +109,28 @@ export default function GoogleTranslate() {
   return (
     <>
       <div id="google_translate_element" className="hidden" aria-hidden="true" />
-      {/* This component now only manages the logic and the popup. The button is in the Header. */}
 
       {showPopup && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm">
-          <div className="bg-popover border rounded-xl shadow-xl p-6 max-w-md mx-4 text-center">
+          <div className="bg-popover border rounded-xl shadow-xl p-6 max-w-md mx-4 text-center relative">
             <h3 className="font-display font-bold text-xl text-gradient mb-3">
               Translate This Page?
             </h3>
             <p className="text-sm text-muted-foreground mb-5">
-              We detected your browser is set to a different language.
-              Would you like us to translate this page for you?
+              We detected your browser is set to a different language. Would you like to translate this page?
             </p>
             <div className="flex gap-3 justify-center">
               <button
                 type="button"
                 onClick={() => handleTranslate(navigator.language?.split("-")[0] || "en")}
-                className="px-5 py-2 bg-primary text-primary-foreground rounded-lg font-medium hover:bg-primary/90 transition-smooth"
+                className="px-5 py-2 bg-primary text-primary-foreground rounded-lg font-medium hover:bg-primary/90 transition-smooth text-sm"
               >
                 Yes, Translate
               </button>
               <button
                 type="button"
                 onClick={() => setShowPopup(false)}
-                className="px-5 py-2 bg-muted text-muted-foreground rounded-lg font-medium hover:bg-muted/80 transition-smooth"
+                className="px-5 py-2 bg-muted text-muted-foreground rounded-lg font-medium hover:bg-muted/80 transition-smooth text-sm"
               >
                 No, keep English
               </button>

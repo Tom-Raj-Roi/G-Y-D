@@ -1,5 +1,4 @@
-import { createContext, useContext, ReactNode, useCallback } from "react";
-import { useTranslation } from "react-i18next";
+import { createContext, useContext, ReactNode, useState, useCallback, useEffect } from "react";
 
 export const LANGUAGES = [
   { code: "en", name: "English" },
@@ -34,27 +33,79 @@ export const LANGUAGES = [
   { code: "el", name: "Ελληνικά" },
 ];
 
-// Changed TFunction to a clean, custom function signature to match what you return
 type LangCtx = { 
   lang: string; 
   setLang: (c: string) => void; 
   translate: (key: string, fallback?: string) => string; 
 };
 
-const Ctx = createContext<LangCtx>({} as LangCtx);
+const Ctx = createContext<LangCtx>({
+  lang: "en",
+  setLang: () => {},
+  translate: (_key, fallback) => fallback || _key,
+});
 
 export function LanguageProvider({ children }: { children: ReactNode }) {
-  const { i18n, t } = useTranslation();
+  const [lang, setLangState] = useState<string>(() => {
+    if (typeof window !== "undefined") {
+      const saved = localStorage.getItem("app_lang");
+      if (saved) return saved;
+      
+      const match = document.cookie.match(/(?:^|;) *googtrans=([^;]+)/);
+      if (match) {
+        const parts = match[1].split("/");
+        const target = parts[parts.length - 1];
+        if (target && LANGUAGES.some((l) => l.code === target)) {
+          return target;
+        }
+      }
+    }
+    return "en";
+  });
+
+  const setGoogTransCookie = (code: string) => {
+    const hostname = window.location.hostname;
+    if (code === "en") {
+      document.cookie = `googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
+      document.cookie = `googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=${hostname}`;
+      document.cookie = `googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=.${hostname}`;
+    } else {
+      const value = `/en/${code}`;
+      document.cookie = `googtrans=${value}; path=/;`;
+      document.cookie = `googtrans=${value}; path=/; domain=${hostname}`;
+    }
+  };
+
+  const triggerGoogleTranslateSelect = (code: string) => {
+    const select = document.querySelector<HTMLSelectElement>(".goog-te-combo");
+    if (select) {
+      select.value = code;
+      select.dispatchEvent(new Event("change"));
+    }
+  };
 
   const setLang = useCallback((code: string) => {
-    i18n.changeLanguage(code);
-  }, [i18n]);
+    setLangState(code);
+    localStorage.setItem("app_lang", code);
+    setGoogTransCookie(code);
+    triggerGoogleTranslateSelect(code);
+  }, []);
 
-  const translate = useCallback((key: string, fallback?: string) => {
-    return t(key, { defaultValue: fallback });
-  }, [t]);
+  useEffect(() => {
+    if (lang !== "en") {
+      setGoogTransCookie(lang);
+    }
+  }, [lang]);
 
-  return <Ctx.Provider value={{ lang: i18n.language, setLang, translate }}>{children}</Ctx.Provider>;
+  const translate = useCallback((_key: string, fallback?: string) => {
+    return fallback || _key;
+  }, []);
+
+  return (
+    <Ctx.Provider value={{ lang, setLang, translate }}>
+      {children}
+    </Ctx.Provider>
+  );
 }
 
 export const useLanguage = () => useContext(Ctx);

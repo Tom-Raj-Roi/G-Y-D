@@ -23,11 +23,11 @@ The email provider credentials must stay in Supabase secrets. Do not place them 
 
 ## Email OTP verification
 
-Email verification is handled by the `EmailOTPAuth` component (`src/components/EmailOTPAuth.tsx`), which is used on the **Contact** form (`src/pages/Contact.tsx`). When the user clicks "Send Email Verification Code", the component:
+Email verification is handled by the `EmailOTPAuth` component (`src/components/EmailOTPAuth.tsx`), which is used across form submissions. When the user clicks "Send Email Verification Code", the component:
 
-1. Generates a random 8-digit code and stores it in `localStorage`.
-2. Invokes the `send-otp-email` Supabase Edge Function, which sends the code via the [Resend](https://resend.com) API.
-3. If the email is sent successfully, the user enters the code to verify their email address.
+1. Generates an 8-digit code and stores it in `localStorage` with a 10-minute expiration timestamp.
+2. Invokes the `send-otp-email` Supabase Edge Function, which sends the code via the [Resend](https://resend.com) API with 8s timeout and automatic retry logic.
+3. Once sent, the user enters the code to verify their email address.
 
 **Prerequisites:** deploy the `send-otp-email` Edge Function and configure it with a transactional email provider:
 
@@ -42,35 +42,21 @@ Email verification is handled by the `EmailOTPAuth` component (`src/components/E
    supabase functions deploy send-otp-email
    ```
 
-If the Edge Function is not deployed or the secrets are missing, the component will show a clear error message instead of silently falling back to a local-only code. The user will not be able to verify their email until the function is properly deployed and configured.
+## Firebase Removal
 
-## Phone OTP verification (Firebase)
-
-
-Phone number verification is now handled client-side via **Firebase Phone Authentication** (SMS OTP).
-
-- The Firebase config lives in `src/integrations/firebase/config.ts` and reads credentials from `.env` (`VITE_FIREBASE_*`).
-- The reusable component `src/components/PhoneOTPAuth.tsx` sends an SMS code via `signInWithPhoneNumber`, verifies it with `ConfirmationResult.confirm()`, and reports success back to the parent via `onVerified(true)`.
-- The **Contact** form (`src/pages/Contact.tsx`) integrates `PhoneOTPAuth` after the phone field. The submit button is disabled until the phone is verified, and `phone_verified` is set to `true` only after successful OTP confirmation.
-- `email_verified` is set to `false` by default; email verification can be added separately.
-- **Prerequisites:** add your Firebase Web App credentials to `.env` and enable **Phone Authentication** in the Firebase Console → Authentication → Sign-in method.
-
-### reCAPTCHA verifier
-
-`PhoneOTPAuth` uses Firebase's `RecaptchaVerifier` with **invisible** reCAPTCHA (`size: "invisible"`). The verifier is created lazily when the user clicks "Send SMS Verification Code" and is automatically torn down (via `clear()`) on phone-number change and unmount to prevent the "reCAPTCHA has already been rendered" error.
-
-Key features:
-
-- **Localization:** The component sets `firebaseAuth.languageCode` to the current app language (from `useLanguage()`), which localizes both the reCAPTCHA widget and the SMS message sent to the user.
-- **Pre-rendering:** The reCAPTCHA is pre-rendered via `verifier.render()` so the widget is ready before the user submits the sign-in request. The widget ID is stored on `window.recaptchaWidgetId` for potential manual API calls (e.g. `grecaptcha.reset`).
-- **Testing with fictional phone numbers:** Pass `testMode={true}` to the component or set `VITE_OTP_TEST_MODE=true` in `.env` to enable `appVerificationDisabledForTesting`. This makes Firebase automatically resolve the reCAPTCHA so you can test with fictional phone numbers (configured in the Firebase Console → Authentication → Sign-in method → Phone numbers for testing) without solving a real challenge. **Never enable this in production.**
-
-The old server-side `otp_codes` table was dropped by migration `20260715000000_admin_notifications_and_remove_otp.sql`.
+Firebase has been completely removed from the project. All dependencies (`firebase`), SDK configurations, and phone OTP components have been removed and replaced with direct Supabase Edge Function services.
 
 ## Language / translation
 
-Navigation and the translation keys in `public/locales/en/translation.json` change with the language selector in the header. Text saved through **Home content** is shared editorial content; it is not automatically machine-translated.
+Website translation is powered by **Google Translate widget** (`src/components/GoogleTranslate.tsx`, rendered in the Header), providing instant dynamic machine translation for every page, form field, and database content into 30+ supported languages.
 
-**Google Translate widget** (`src/components/GoogleTranslate.tsx`, rendered in the Header) provides on-demand machine translation for every word on the page — including numbers, form labels, and placeholders — via the Google Translate Element API. It also auto-detects the visitor's browser language and shows a one-time popup offering to translate the page. `autoDisplay: true` ensures all text nodes are translated.
+- Persistent language selection is managed by `LanguageContext` via the `googtrans` cookie and local storage.
+- Auto-detects visitor browser language and provides a seamless translation experience across page refreshes and route transitions.
+- All legacy i18next dependencies and unneeded locale translation files have been removed to eliminate conflicts and prevent HTTP 404 errors.
 
-To publish edited content in multiple languages accurately, use a translation workflow (human review is recommended) and store a version for each language before enabling it.
+## Database & Security Hardening
+
+The migration `20260807000000_fix_all_security_warnings.sql` resolves all Supabase Security Advisor issues:
+- Fixed mutable `search_path` on all SQL functions (`SET search_path = public, pg_temp`).
+- Restricted `SECURITY DEFINER` function execution permissions.
+- Hardened Row Level Security (RLS) policies on `contacts`, `job_seekers`, `job_referrers`, `agencies`, and `vacancy_applications` to ensure input payloads are validated.
